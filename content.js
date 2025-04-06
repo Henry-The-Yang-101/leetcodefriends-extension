@@ -28,6 +28,7 @@ function addFriendsButton() {
     // Set popup styling with opacity transition for smooth fade in/out (position will be set dynamically)
     popup.className = "absolute bg-white dark:bg-gray-800 text-black dark:text-white rounded shadow-2xl p-2 pt-3 text-sm z-50 transition-opacity duration-200";
     popup.style.opacity = "0";
+    popup.style.pointerEvents = "none";
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       popup.style.border = "1px solid #374151";
     } else {
@@ -43,19 +44,23 @@ function addFriendsButton() {
 
     document.body.appendChild(popup);
 
+    const baseHeight = popup.offsetHeight * 12;
+
     // Toggle the popup's visibility on click
     friendsButton.addEventListener("click", () => {
       if (popup.style.opacity === "1") {
         popup.style.opacity = "0";
+        popup.style.pointerEvents = "none";
       } else {
         const rect = friendsButton.getBoundingClientRect();
         popup.style.top = (rect.bottom + window.scrollY + 12) + 'px';
         popup.style.right = '3px';
-        popup.style.height = (popup.offsetHeight * 12) + 'px';
+        popup.style.height = baseHeight + 'px';
         const friendCenter = rect.left + rect.width / 2;
         const newWidth = (window.innerWidth - friendCenter - 3) * 2;
         popup.style.width = newWidth + 'px';
         popup.style.opacity = "1";
+        popup.style.pointerEvents = "auto";
       }
     });
 
