@@ -33,7 +33,7 @@ function addFriendsButton() {
     } else {
       popup.style.border = "1px solid #D1D5DB";
     }
-    popup.style.boxShadow = "0 4px 50px rgba(0, 0, 0, 0.6)";
+    popup.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.4)";
 
     // Create a text container for the popup content
     const popupText = document.createElement("div");
@@ -49,11 +49,14 @@ function addFriendsButton() {
     friendsButton.addEventListener("mouseenter", () => {
       const rect = friendsButton.getBoundingClientRect();
       popup.style.top = (rect.bottom + window.scrollY + 12) + 'px';
-      popup.style.width = (baseWidth * 4) + 'px';
-      popup.style.height = (baseHeight * 12) + 'px';
       popup.style.right = '3px';
-
+      popup.style.height = (baseHeight * 12) + 'px';
       popup.style.opacity = "1";
+
+      const friendCenter = rect.left + rect.width / 2;
+      const newWidth = (window.innerWidth - friendCenter - 3) * 2;
+
+      popup.style.width = newWidth + 'px';
     });
     friendsButton.addEventListener("mouseleave", () => {
       popup.style.opacity = "0";
