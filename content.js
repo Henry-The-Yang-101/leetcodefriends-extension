@@ -34,6 +34,7 @@ function addFriendsButton() {
       popup.style.border = "1px solid #D1D5DB";
     }
     popup.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.4)";
+    popup.title = "Friends";
 
     // Create a text container for the popup content
     const popupText = document.createElement("div");
@@ -42,24 +43,20 @@ function addFriendsButton() {
 
     document.body.appendChild(popup);
 
-    const baseWidth = popup.offsetWidth;
-    const baseHeight = popup.offsetHeight;
-
-    // Use opacity transition on hover instead of display toggling
-    friendsButton.addEventListener("mouseenter", () => {
-      const rect = friendsButton.getBoundingClientRect();
-      popup.style.top = (rect.bottom + window.scrollY + 12) + 'px';
-      popup.style.right = '3px';
-      popup.style.height = (baseHeight * 12) + 'px';
-      popup.style.opacity = "1";
-
-      const friendCenter = rect.left + rect.width / 2;
-      const newWidth = (window.innerWidth - friendCenter - 3) * 2;
-
-      popup.style.width = newWidth + 'px';
-    });
-    friendsButton.addEventListener("mouseleave", () => {
-      popup.style.opacity = "0";
+    // Toggle the popup's visibility on click
+    friendsButton.addEventListener("click", () => {
+      if (popup.style.opacity === "1") {
+        popup.style.opacity = "0";
+      } else {
+        const rect = friendsButton.getBoundingClientRect();
+        popup.style.top = (rect.bottom + window.scrollY + 12) + 'px';
+        popup.style.right = '3px';
+        popup.style.height = (popup.offsetHeight * 12) + 'px';
+        const friendCenter = rect.left + rect.width / 2;
+        const newWidth = (window.innerWidth - friendCenter - 3) * 2;
+        popup.style.width = newWidth + 'px';
+        popup.style.opacity = "1";
+      }
     });
 
     // Wait for the navbar container that holds the top bar elements
