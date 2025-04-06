@@ -26,6 +26,35 @@ function addFriendsButton() {
     `;
     div.title = "Friends";
 
+    const popup = document.createElement("div");
+    // Set popup styling with opacity transition for smooth fade in/out (position will be set dynamically)
+    popup.className = "absolute bg-white dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-700 rounded shadow-lg p-2 pt-3 text-sm z-50 transition-opacity duration-200";
+    popup.style.opacity = "0";
+
+    // Create an arrow element to point to the icon
+    const arrow = document.createElement("div");
+    arrow.className = "absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rotate-45";
+    popup.appendChild(arrow);
+
+    // Create a text container for the popup content
+    const popupText = document.createElement("div");
+    popupText.textContent = "Friends Panel Coming Soon!";
+    popup.appendChild(popupText);
+
+    document.body.appendChild(popup);
+
+    // Use opacity transition on hover instead of display toggling
+    div.addEventListener("mouseenter", () => {
+        const rect = div.getBoundingClientRect();
+        popup.style.top = rect.bottom + window.scrollY + 'px';
+        popup.style.left = rect.left + window.scrollX + rect.width / 2 + 'px';
+        popup.style.transform = 'translateX(-50%)';
+        popup.style.opacity = "1";
+    });
+    div.addEventListener("mouseleave", () => {
+        popup.style.opacity = "0";
+    });
+
     // Wait for the navbar container that holds the top bar elements
     let navbar = await waitForElement("nav#leetcode-navbar");
     // Find the main container holding the items (assumed to have these classes)
