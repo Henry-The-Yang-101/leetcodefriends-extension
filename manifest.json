@@ -21,7 +21,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["username_extractor.js"],
+      "resources": ["username_extractor.js", "popup_content.html"],
       "matches": ["https://leetcode.com/*"]
     }
   ]
