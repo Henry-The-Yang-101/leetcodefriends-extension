@@ -64,27 +64,13 @@ function addFriendsButton() {
       }
     });
 
-    // Wait for the navbar container that holds the top bar elements
-    let navbar = await waitForElement("nav#leetcode-navbar");
-    // Find the main container holding the items (assumed to have these classes)
-    let container = navbar.querySelector(".relative.flex.items-center.space-x-2");
+    let container = await waitForElement("nav#leetcode-navbar .relative.flex.items-center.space-x-2");
     if (!container) {
       console.warn("Navbar container not found!");
-      return;
+      return; 
     }
-    // Find the profile button by its ID and then its closest container
-    let profileButton = container.querySelector("#headlessui-menu-button-5");
-    if (profileButton) {
-      let profileContainer = profileButton.closest("div[style*='position: relative']");
-      if (profileContainer) {
-        // Insert the new element before the profile container
-        container.insertBefore(friendsButton, profileContainer);
-      } else {
-        console.warn("Profile container not found!");
-      }
-    } else {
-      console.warn("Profile button not found!");
-    }
+
+    container.insertBefore(friendsButton, container.children[2]);
   };
 }
 
