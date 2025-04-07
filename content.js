@@ -73,6 +73,7 @@ function addFriendsButton() {
           if (!popup.contains(event.target) && !friendsButton.contains(event.target)) {
             popup.style.opacity = "0";
             popup.style.pointerEvents = "none";
+            friendsButton.classList.remove("bg-fill-3", "dark:bg-dark-fill-3");
             document.removeEventListener("click", closeOnClickOutside);
           }
         };
@@ -84,6 +85,7 @@ function addFriendsButton() {
           if (event.key === "Escape") {
             popup.style.opacity = "0";
             popup.style.pointerEvents = "none";
+            friendsButton.classList.remove("bg-fill-3", "dark:bg-dark-fill-3");
             document.removeEventListener("keydown", closeOnEsc);
           }
         };
