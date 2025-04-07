@@ -23,9 +23,10 @@ function addFriendsButton() {
 
     const popup = document.createElement("div");
     // Set popup styling with opacity transition for smooth fade in/out (position will be set dynamically)
-    popup.className = "absolute bg-white dark:bg-gray-800 text-black dark:text-white rounded shadow-2xl p-2 pt-3 text-sm z-50 transition-opacity duration-200";
+    popup.className = "absolute bg-white dark:bg-gray-800 text-black dark:text-white rounded shadow-2xl p-2 pt-3 text-sm transition-opacity duration-200";
     popup.style.opacity = "0";
     popup.style.pointerEvents = "none";
+    popup.style.zIndex = "9999";
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       popup.style.border = "1px solid #374151";
     } else {
