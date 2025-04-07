@@ -59,6 +59,26 @@ function addFriendsButton() {
         popup.style.width = newWidth + 'px';
         popup.style.opacity = "1";
         popup.style.pointerEvents = "auto";
+
+        const closeOnClickOutside = (event) => {
+          if (!popup.contains(event.target) && !friendsButton.contains(event.target)) {
+            popup.style.opacity = "0";
+            popup.style.pointerEvents = "none";
+            document.removeEventListener("click", closeOnClickOutside);
+          }
+        };
+        setTimeout(() => {
+          document.addEventListener("click", closeOnClickOutside);
+        }, 0);
+        
+        const closeOnEsc = (event) => {
+          if (event.key === "Escape") {
+            popup.style.opacity = "0";
+            popup.style.pointerEvents = "none";
+            document.removeEventListener("keydown", closeOnEsc);
+          }
+        };
+        document.addEventListener("keydown", closeOnEsc);
       }
     });
 
