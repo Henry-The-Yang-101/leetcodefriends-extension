@@ -12,6 +12,7 @@ async function waitForElement(selector) {
 
 function addFriendsButton() {
   window.addEventListener("pageshow", async () => {
+    const isDark = document.documentElement.classList.contains("dark");
     const currentUrl = window.location.href;
     let friendsButton = document.createElement("a");
     friendsButton.className = "group relative flex h-8 items-center justify-center rounded p-1 hover:bg-fill-3 dark:hover:bg-dark-fill-3 cursor-pointer";
@@ -55,6 +56,7 @@ function addFriendsButton() {
       if (popup.style.opacity === "1") {
         popup.style.opacity = "0";
         popup.style.pointerEvents = "none";
+        friendsButton.style.backgroundColor = "";
       } else {
         const rect = friendsButton.getBoundingClientRect();
         popup.style.top = (rect.bottom + window.scrollY + 12) + 'px';
@@ -65,6 +67,7 @@ function addFriendsButton() {
         popup.style.width = newWidth + 'px';
         popup.style.opacity = "1";
         popup.style.pointerEvents = "auto";
+        friendsButton.style.backgroundColor = isDark ? "#2d2d2d" : "#f3f4f6";
 
         const closeOnClickOutside = (event) => {
           if (!popup.contains(event.target) && !friendsButton.contains(event.target)) {
