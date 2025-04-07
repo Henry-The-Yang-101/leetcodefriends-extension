@@ -88,24 +88,36 @@ function addFriendsButton() {
       }
     });
 
-    let container;
+    const selectorMap = [
+      {
+        pattern: "https://leetcode.com/problems/",
+        selector: "nav.z-nav-1 .relative.ml-4.flex.items-center.gap-2",
+        insertIndex: 3
+      },
+      {
+        pattern: "https://leetcode.com",
+        selector: "nav#leetcode-navbar .relative.flex.items-center.space-x-2",
+        insertIndex: 2
+      }
+    ];
 
-    if (currentUrl.startsWith("https://leetcode.com/problems/")) {
-      container = await waitForElement("nav.z-nav-1 .relative.ml-4.flex.items-center.gap-2");
-    } else {
-      container = await waitForElement("nav#leetcode-navbar .relative.flex.items-center.space-x-2");
+    let container;
+    let insertIndex = 0;
+
+    for (const { pattern, selector, insertIndex: index } of selectorMap) {
+      if (currentUrl.startsWith(pattern)) {
+        container = await waitForElement(selector);
+        insertIndex = index;
+        break;
+      }
     }
 
     if (!container) {
       console.warn("Navbar container not found!");
-      return; 
+      return;
     }
 
-    if (currentUrl.startsWith("https://leetcode.com/problems/")) {
-      container.insertBefore(friendsButton, container.children[3]);
-    } else {
-      container.insertBefore(friendsButton, container.children[2]);
-    }
+    container.insertBefore(friendsButton, container.children[insertIndex]);
 
     const script = document.createElement("script");
     script.src = chrome.runtime.getURL("username_extractor.js");
