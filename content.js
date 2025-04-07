@@ -61,26 +61,6 @@ function addFriendsButton() {
       }
     });
 
-    // Inject script to extract window.LeetCodeData from page context
-    const script = document.createElement("script");
-    script.textContent = `
-      (function() {
-        if (window.LeetCodeData && window.LeetCodeData.userStatus?.username) {
-          window.postMessage({ type: 'LEETCODE_USERNAME', username: window.LeetCodeData.userStatus.username }, '*');
-        }
-      })();
-    `;
-    document.documentElement.appendChild(script);
-    script.remove();
-
-    window.addEventListener("message", (event) => {
-      if (event.source !== window) return;
-      if (event.data?.type === "LEETCODE_USERNAME") {
-        const username = event.data.username;
-        console.log("Username from injected script:", username);
-      }
-    });
-
     let container;
 
     if (currentUrl.startsWith("https://leetcode.com/problems/")) {
@@ -99,6 +79,19 @@ function addFriendsButton() {
     } else {
       container.insertBefore(friendsButton, container.children[2]);
     }
+
+    const script = document.createElement("script");
+    script.src = chrome.runtime.getURL("username_extractor.js");
+    script.onload = () => script.remove();
+    (document.head || document.documentElement).appendChild(script);
+
+    window.addEventListener("message", (event) => {
+      if (event.source !== window) return;
+      if (event.data?.type === "LEETCODE_USERNAME") {
+        const username = event.data.username;
+        console.log("Username from injected script:", username);
+      }
+    });
   });
 }
 
