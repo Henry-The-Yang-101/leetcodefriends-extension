@@ -11,7 +11,7 @@ async function waitForElement(selector) {
 }
 
 function addFriendsButton() {
-  window.onload = async () => {
+  window.addEventListener("pageshow", async () => {
     const currentUrl = window.location.href;
     let friendsButton = document.createElement("a");
     friendsButton.className = "group relative flex h-8 items-center justify-center rounded p-1 hover:bg-fill-3 dark:hover:bg-dark-fill-3 cursor-pointer";
@@ -73,14 +73,13 @@ function addFriendsButton() {
       console.warn("Navbar container not found!");
       return; 
     }
-    console.log(container);
 
     if (currentUrl.startsWith("https://leetcode.com/problems/")) {
       container.insertBefore(friendsButton, container.children[3]);
     } else {
       container.insertBefore(friendsButton, container.children[2]);
     }
-  };
+  });
 }
 
 addFriendsButton(); // Call the function manually
