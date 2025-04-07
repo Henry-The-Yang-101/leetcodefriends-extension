@@ -56,7 +56,7 @@ function addFriendsButton() {
       if (popup.style.opacity === "1") {
         popup.style.opacity = "0";
         popup.style.pointerEvents = "none";
-        friendsButton.style.backgroundColor = "";
+        friendsButton.classList.remove("bg-fill-3", "dark:bg-dark-fill-3");
       } else {
         const rect = friendsButton.getBoundingClientRect();
         popup.style.top = (rect.bottom + window.scrollY + 12) + 'px';
@@ -67,7 +67,7 @@ function addFriendsButton() {
         popup.style.width = newWidth + 'px';
         popup.style.opacity = "1";
         popup.style.pointerEvents = "auto";
-        friendsButton.style.backgroundColor = isDark ? "#2d2d2d" : "#f3f4f6";
+        friendsButton.classList.add("bg-fill-3", "dark:bg-dark-fill-3");
 
         const closeOnClickOutside = (event) => {
           if (!popup.contains(event.target) && !friendsButton.contains(event.target)) {
