@@ -10,12 +10,9 @@ async function waitForElement(selector) {
   });
 }
 
-function getDirectChild(element, selector) {
-  return Array.from(element.children).find(child => child.matches(selector));
-}
-
 function addFriendsButton() {
   window.onload = async () => {
+    const currentUrl = window.location.href;
     let friendsButton = document.createElement("a");
     friendsButton.className = "group relative flex h-8 items-center justify-center rounded p-1 hover:bg-fill-3 dark:hover:bg-dark-fill-3 cursor-pointer";
     friendsButton.innerHTML = `
@@ -64,13 +61,25 @@ function addFriendsButton() {
       }
     });
 
-    let container = await waitForElement("nav#leetcode-navbar .relative.flex.items-center.space-x-2");
+    let container;
+
+    if (currentUrl.startsWith("https://leetcode.com/problems/")) {
+      container = await waitForElement("nav.z-nav-1 .relative.ml-4.flex.items-center.gap-2");
+    } else {
+      container = await waitForElement("nav#leetcode-navbar .relative.flex.items-center.space-x-2");
+    }
+
     if (!container) {
       console.warn("Navbar container not found!");
       return; 
     }
+    console.log(container);
 
-    container.insertBefore(friendsButton, container.children[2]);
+    if (currentUrl.startsWith("https://leetcode.com/problems/")) {
+      container.insertBefore(friendsButton, container.children[3]);
+    } else {
+      container.insertBefore(friendsButton, container.children[2]);
+    }
   };
 }
 
