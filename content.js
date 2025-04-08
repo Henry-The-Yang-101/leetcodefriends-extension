@@ -38,7 +38,8 @@ function renderFriends(friendsData) {
           friend_username: friend.friend_username,
           avatar: friend.data?.userPublicProfile?.profile?.userAvatar || '',
           timestamp: Number(sub.timestamp),
-          title: sub.title
+          title: sub.title,
+          titleSlug: sub.titleSlug
         });
       });
     }
@@ -114,14 +115,19 @@ function renderFriends(friendsData) {
 
     card.appendChild(headerDiv);
 
-    // Create a div below the header for the submission question title
-    const submissionTitleDiv = document.createElement('div');
-    submissionTitleDiv.style.fontSize = '13px';
-    submissionTitleDiv.style.color = '#666';
-    submissionTitleDiv.style.textAlign = 'left';
-    submissionTitleDiv.style.marginTop = '4px';
-    submissionTitleDiv.textContent = item.title;
-    card.appendChild(submissionTitleDiv);
+    // Create a link for the submission question title
+    const submissionTitleLink = document.createElement('a');
+    submissionTitleLink.href = `https://leetcode.com/problems/${item.titleSlug}`;
+    submissionTitleLink.target = '_blank';
+    submissionTitleLink.textContent = item.title;
+    submissionTitleLink.style.fontSize = '13px';
+    submissionTitleLink.style.color = '#666';
+    submissionTitleLink.style.textAlign = 'left';
+    submissionTitleLink.style.marginTop = '4px';
+    submissionTitleLink.style.display = 'inline-block';
+    submissionTitleLink.style.textDecoration = 'none';
+
+    card.appendChild(submissionTitleLink);
 
     container.appendChild(card);
   });
