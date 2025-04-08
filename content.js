@@ -33,46 +33,46 @@ function renderFriends(friendsData) {
     const card = document.createElement('div');
     card.style.border = '1px solid #ddd';
     card.style.borderRadius = '8px';
-    card.style.padding = '12px';
+    card.style.padding = '8px'; // Reduced padding for a more compact card
     card.style.background = '#fff';
     card.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
 
-    const username = document.createElement('h3');
+    // Create header div with avatar and username
+    const headerDiv = document.createElement('div');
+    headerDiv.style.display = 'flex';
+    headerDiv.style.alignItems = 'center';
+    headerDiv.style.marginBottom = '4px';
+
+    const avatar = document.createElement('img');
+    avatar.src = friend.data?.userPublicProfile?.profile?.userAvatar || '';
+    avatar.style.width = '30px';
+    avatar.style.height = '30px';
+    avatar.style.borderRadius = '50%';
+    avatar.style.marginRight = '8px';
+
+    const username = document.createElement('span');
     username.textContent = friend.friend_username;
-    username.style.margin = '0 0 8px 0';
-    username.style.fontSize = '16px';
+    username.style.fontSize = '14px';
     username.style.fontWeight = '600';
 
-    const subtitle = document.createElement('div');
-    subtitle.textContent = 'Recent Submissions';
-    subtitle.style.fontSize = '14px';
-    subtitle.style.marginBottom = '6px';
-    subtitle.style.color = '#333';
+    headerDiv.appendChild(avatar);
+    headerDiv.appendChild(username);
+    card.appendChild(headerDiv);
 
-    const list = document.createElement('ul');
-    list.style.margin = '0';
-    list.style.padding = '0 0 0 20px';
-
+    // Create a compact section to show only the most recent submission
+    const latestSubmissionDiv = document.createElement('div');
+    latestSubmissionDiv.style.fontSize = '13px';
     if (friend.data?.recentAcSubmissions?.length > 0) {
-      friend.data.recentAcSubmissions.forEach(sub => {
-        const item = document.createElement('li');
-        const date = new Date(Number(sub.timestamp) * 1000);
-        item.textContent = `${sub.title} (at ${date.toLocaleString()})`;
-        item.style.fontSize = '13px';
-        item.style.color = '#444';
-        list.appendChild(item);
-      });
+      const sub = friend.data.recentAcSubmissions[0];
+      const date = new Date(Number(sub.timestamp) * 1000);
+      latestSubmissionDiv.textContent = `${sub.title} (at ${date.toLocaleString()})`;
+      latestSubmissionDiv.style.color = '#444';
     } else {
-      const noSubmissions = document.createElement('li');
-      noSubmissions.textContent = 'No recent submissions';
-      noSubmissions.style.fontSize = '13px';
-      noSubmissions.style.color = '#888';
-      list.appendChild(noSubmissions);
+      latestSubmissionDiv.textContent = 'No recent submissions';
+      latestSubmissionDiv.style.color = '#888';
     }
+    card.appendChild(latestSubmissionDiv);
 
-    card.appendChild(username);
-    card.appendChild(subtitle);
-    card.appendChild(list);
     container.appendChild(card);
   });
 }
@@ -107,21 +107,21 @@ function addFriendsButton() {
         wrapper.innerHTML = html;
         popup.appendChild(wrapper);
 
-        const friendsTab = wrapper.querySelector("#friends-tab");
+        const friendActivityTab = wrapper.querySelector("#friend-activity-tab");
         const leaderboardTab = wrapper.querySelector("#leaderboard-tab");
-        const friendsView = wrapper.querySelector("#friends-view");
+        const friendsView = wrapper.querySelector("#friend-activity-view");
         const leaderboardView = wrapper.querySelector("#leaderboard-view");
 
         // Set initial active state
-        friendsTab.style.backgroundColor = "#ffa1161f";
-        friendsTab.style.color = "#ffa116";
+        friendActivityTab.style.backgroundColor = "#ffa1161f";
+        friendActivityTab.style.color = "#ffa116";
         leaderboardTab.style.backgroundColor = "white";
         leaderboardTab.style.color = "#333";
 
-        friendsTab.addEventListener("click", () => {
+        friendActivityTab.addEventListener("click", () => {
           // Update button styles
-          friendsTab.style.backgroundColor = "#ffa1161f";
-          friendsTab.style.color = "#ffa116";
+          friendActivityTab.style.backgroundColor = "#ffa1161f";
+          friendActivityTab.style.color = "#ffa116";
           leaderboardTab.style.backgroundColor = "white";
           leaderboardTab.style.color = "#333";
 
@@ -134,8 +134,8 @@ function addFriendsButton() {
           // Update button styles
           leaderboardTab.style.backgroundColor = "#ffa1161f";
           leaderboardTab.style.color = "#ffa116";
-          friendsTab.style.backgroundColor = "white";
-          friendsTab.style.color = "#333";
+          friendActivityTab.style.backgroundColor = "white";
+          friendActivityTab.style.color = "#333";
 
           // Update view visibility
           leaderboardView.style.display = "block";
