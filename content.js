@@ -10,10 +10,95 @@ async function waitForElement(selector) {
   });
 }
 
+async function loadFriendsData(container, username) {
+  console.log('Loading friends data for:', username);
+  try {
+    const response = await fetch(`http://127.0.0.1:5000/friends?username=${username}`);
+    const result = await response.json();
+    if (result.friends) {
+      renderFriends(result.friends, container);
+    } else {
+      console.error('No friends data found in response', result);
+    }
+  } catch (error) {
+    console.error('Failed to load friends data:', error);
+  }
+}
+
+function renderFriends(friendsData, container) {
+  friendsData.forEach(friend => {
+    // Create a div for each friend item (card)
+    const friendCard = document.createElement('div');
+    friendCard.className = 'friend-card';
+    friendCard.style.border = '1px solid #ccc';
+    friendCard.style.borderRadius = '6px';
+    friendCard.style.padding = '8px';
+    friendCard.style.marginBottom = '10px';
+
+    // Friend header: Display the friend's username
+    const header = document.createElement('h3');
+    header.textContent = friend.friend_username || 'Unknown User';
+    friendCard.appendChild(header);
+
+    // Create section for Recent Accepted Submissions, if available
+    if (friend.data?.recentAcSubmissions) {
+      const recentSubmissionsDiv = document.createElement('div');
+      const subHeading = document.createElement('h4');
+      subHeading.textContent = 'Recent Submissions';
+      recentSubmissionsDiv.appendChild(subHeading);
+
+      const submissionList = document.createElement('ul');
+      friend.data.recentAcSubmissions.forEach(submission => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${submission.title} (at ${new Date(Number(submission.timestamp) * 1000).toLocaleString()})`;
+        submissionList.appendChild(listItem);
+      });
+      recentSubmissionsDiv.appendChild(submissionList);
+      friendCard.appendChild(recentSubmissionsDiv);
+    }
+
+    // Create section for Questions Count if available
+    if (friend.data?.allQuestionsCount) {
+      const questionsDiv = document.createElement('div');
+      const questionsHeading = document.createElement('h4');
+      questionsHeading.textContent = 'Questions Count';
+      questionsDiv.appendChild(questionsHeading);
+
+      const questionsList = document.createElement('ul');
+      friend.data.allQuestionsCount.forEach(item => {
+        const itemEl = document.createElement('li');
+        itemEl.textContent = `${item.difficulty}: ${item.count}`;
+        questionsList.appendChild(itemEl);
+      });
+      questionsDiv.appendChild(questionsList);
+      friendCard.appendChild(questionsDiv);
+    }
+
+    // Additional sections can be similarly added here—for example, user profile stats:
+    if (friend.data?.userPublicProfile?.profile) {
+      const profileDiv = document.createElement('div');
+      const profileHeading = document.createElement('h4');
+      profileHeading.textContent = 'Profile';
+      profileDiv.appendChild(profileHeading);
+
+      const profileContent = document.createElement('p');
+      profileContent.textContent = `Ranking: ${friend.data.userPublicProfile.profile.ranking}`;
+      profileDiv.appendChild(profileContent);
+      friendCard.appendChild(profileDiv);
+    }
+
+    // Finally, add the friend card to the container
+    container.appendChild(friendCard);
+  });
+}
+
+
+
 function addFriendsButton() {
   window.addEventListener("pageshow", async () => {
     const isDark = document.documentElement.classList.contains("dark");
     const currentUrl = window.location.href;
+
     let friendsButton = document.createElement("a");
     friendsButton.className = "group relative flex h-8 items-center justify-center rounded p-1 hover:bg-fill-3 dark:hover:bg-dark-fill-3 cursor-pointer";
     friendsButton.innerHTML = `
@@ -42,6 +127,21 @@ function addFriendsButton() {
       .catch(error => {
         console.error("Failed to load external HTML:", error);
       });
+    
+    const extractor_script = document.createElement("script");
+    extractor_script.src = chrome.runtime.getURL("username_extractor.js");
+    extractor_script.onload = () => extractor_script.remove();
+    (document.head || document.documentElement).appendChild(extractor_script);
+
+    window.addEventListener("message", (event) => {
+      if (event.source !== window) return;
+      if (event.data?.type === "LEETCODE_USERNAME") {
+        const username = event.data.username;
+        const friendsContainer = popup.querySelector("#friends-container");
+        friendsContainer.innerHTML = '';
+        loadFriendsData(friendsContainer, username);
+      }
+    });
 
     document.body.appendChild(popup);
 
@@ -119,19 +219,6 @@ function addFriendsButton() {
     }
 
     container.insertBefore(friendsButton, container.children[insertIndex]);
-
-    const script = document.createElement("script");
-    script.src = chrome.runtime.getURL("username_extractor.js");
-    script.onload = () => script.remove();
-    (document.head || document.documentElement).appendChild(script);
-
-    window.addEventListener("message", (event) => {
-      if (event.source !== window) return;
-      if (event.data?.type === "LEETCODE_USERNAME") {
-        const username = event.data.username;
-        console.log("Username from injected script:", username);
-      }
-    });
   });
 }
 
