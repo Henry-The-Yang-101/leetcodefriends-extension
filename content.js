@@ -25,74 +25,57 @@ async function loadFriendsData(container, username) {
   }
 }
 
-function renderFriends(friendsData, container) {
+function renderFriends(friendsData) {
+  const container = document.getElementById('friends-container');
+  container.innerHTML = '';
+
   friendsData.forEach(friend => {
-    // Create a div for each friend item (card)
-    const friendCard = document.createElement('div');
-    friendCard.className = 'friend-card';
-    friendCard.style.border = '1px solid #ccc';
-    friendCard.style.borderRadius = '6px';
-    friendCard.style.padding = '8px';
-    friendCard.style.marginBottom = '10px';
+    const card = document.createElement('div');
+    card.style.border = '1px solid #ddd';
+    card.style.borderRadius = '8px';
+    card.style.padding = '12px';
+    card.style.background = '#fff';
+    card.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
 
-    // Friend header: Display the friend's username
-    const header = document.createElement('h3');
-    header.textContent = friend.friend_username || 'Unknown User';
-    friendCard.appendChild(header);
+    const username = document.createElement('h3');
+    username.textContent = friend.friend_username;
+    username.style.margin = '0 0 8px 0';
+    username.style.fontSize = '16px';
+    username.style.fontWeight = '600';
 
-    // Create section for Recent Accepted Submissions, if available
-    if (friend.data?.recentAcSubmissions) {
-      const recentSubmissionsDiv = document.createElement('div');
-      const subHeading = document.createElement('h4');
-      subHeading.textContent = 'Recent Submissions';
-      recentSubmissionsDiv.appendChild(subHeading);
+    const subtitle = document.createElement('div');
+    subtitle.textContent = 'Recent Submissions';
+    subtitle.style.fontSize = '14px';
+    subtitle.style.marginBottom = '6px';
+    subtitle.style.color = '#333';
 
-      const submissionList = document.createElement('ul');
-      friend.data.recentAcSubmissions.forEach(submission => {
-        const listItem = document.createElement('li');
-        listItem.textContent = `${submission.title} (at ${new Date(Number(submission.timestamp) * 1000).toLocaleString()})`;
-        submissionList.appendChild(listItem);
+    const list = document.createElement('ul');
+    list.style.margin = '0';
+    list.style.padding = '0 0 0 20px';
+
+    if (friend.data?.recentAcSubmissions?.length > 0) {
+      friend.data.recentAcSubmissions.forEach(sub => {
+        const item = document.createElement('li');
+        const date = new Date(Number(sub.timestamp) * 1000);
+        item.textContent = `${sub.title} (at ${date.toLocaleString()})`;
+        item.style.fontSize = '13px';
+        item.style.color = '#444';
+        list.appendChild(item);
       });
-      recentSubmissionsDiv.appendChild(submissionList);
-      friendCard.appendChild(recentSubmissionsDiv);
+    } else {
+      const noSubmissions = document.createElement('li');
+      noSubmissions.textContent = 'No recent submissions';
+      noSubmissions.style.fontSize = '13px';
+      noSubmissions.style.color = '#888';
+      list.appendChild(noSubmissions);
     }
 
-    // Create section for Questions Count if available
-    if (friend.data?.allQuestionsCount) {
-      const questionsDiv = document.createElement('div');
-      const questionsHeading = document.createElement('h4');
-      questionsHeading.textContent = 'Questions Count';
-      questionsDiv.appendChild(questionsHeading);
-
-      const questionsList = document.createElement('ul');
-      friend.data.allQuestionsCount.forEach(item => {
-        const itemEl = document.createElement('li');
-        itemEl.textContent = `${item.difficulty}: ${item.count}`;
-        questionsList.appendChild(itemEl);
-      });
-      questionsDiv.appendChild(questionsList);
-      friendCard.appendChild(questionsDiv);
-    }
-
-    // Additional sections can be similarly added here—for example, user profile stats:
-    if (friend.data?.userPublicProfile?.profile) {
-      const profileDiv = document.createElement('div');
-      const profileHeading = document.createElement('h4');
-      profileHeading.textContent = 'Profile';
-      profileDiv.appendChild(profileHeading);
-
-      const profileContent = document.createElement('p');
-      profileContent.textContent = `Ranking: ${friend.data.userPublicProfile.profile.ranking}`;
-      profileDiv.appendChild(profileContent);
-      friendCard.appendChild(profileDiv);
-    }
-
-    // Finally, add the friend card to the container
-    container.appendChild(friendCard);
+    card.appendChild(username);
+    card.appendChild(subtitle);
+    card.appendChild(list);
+    container.appendChild(card);
   });
 }
-
-
 
 function addFriendsButton() {
   window.addEventListener("pageshow", async () => {
@@ -123,6 +106,41 @@ function addFriendsButton() {
         const wrapper = document.createElement("div");
         wrapper.innerHTML = html;
         popup.appendChild(wrapper);
+
+        const friendsTab = wrapper.querySelector("#friends-tab");
+        const leaderboardTab = wrapper.querySelector("#leaderboard-tab");
+        const friendsView = wrapper.querySelector("#friends-view");
+        const leaderboardView = wrapper.querySelector("#leaderboard-view");
+
+        // Set initial active state
+        friendsTab.style.backgroundColor = "#ffa1161f";
+        friendsTab.style.color = "#ffa116";
+        leaderboardTab.style.backgroundColor = "white";
+        leaderboardTab.style.color = "#333";
+
+        friendsTab.addEventListener("click", () => {
+          // Update button styles
+          friendsTab.style.backgroundColor = "#ffa1161f";
+          friendsTab.style.color = "#ffa116";
+          leaderboardTab.style.backgroundColor = "white";
+          leaderboardTab.style.color = "#333";
+
+          // Update view visibility
+          friendsView.style.display = "block";
+          leaderboardView.style.display = "none";
+        });
+
+        leaderboardTab.addEventListener("click", () => {
+          // Update button styles
+          leaderboardTab.style.backgroundColor = "#ffa1161f";
+          leaderboardTab.style.color = "#ffa116";
+          friendsTab.style.backgroundColor = "white";
+          friendsTab.style.color = "#333";
+
+          // Update view visibility
+          leaderboardView.style.display = "block";
+          friendsView.style.display = "none";
+        });
       })
       .catch(error => {
         console.error("Failed to load external HTML:", error);
@@ -139,13 +157,13 @@ function addFriendsButton() {
         const username = event.data.username;
         const friendsContainer = popup.querySelector("#friends-container");
         friendsContainer.innerHTML = '';
+        friendsContainer.style.maxHeight = '400px';
+        friendsContainer.style.overflowY = 'auto';
         loadFriendsData(friendsContainer, username);
       }
     });
 
     document.body.appendChild(popup);
-
-    const baseHeight = popup.offsetHeight * 12;
 
     // Toggle the popup's visibility on click
     friendsButton.addEventListener("click", () => {
@@ -157,7 +175,8 @@ function addFriendsButton() {
         const rect = friendsButton.getBoundingClientRect();
         popup.style.top = (rect.bottom + window.scrollY + 12) + 'px';
         popup.style.right = '3px';
-        popup.style.height = baseHeight + 'px';
+        popup.style.height = 'auto';
+        popup.style.maxHeight = '500px';
         const friendCenter = rect.left + rect.width / 2;
         const newWidth = (window.innerWidth - friendCenter - 3) * 2;
         popup.style.width = newWidth + 'px';
