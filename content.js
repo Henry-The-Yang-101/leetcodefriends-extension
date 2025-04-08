@@ -53,6 +53,7 @@ function renderFriends(friendsData) {
     card.style.border = '1px solid #ddd';
     card.style.borderRadius = '8px';
     card.style.padding = '8px';
+    card.style.margin = '8px 0'; // Added vertical spacing between cards
     card.style.background = '#fff';
     card.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
 
@@ -202,8 +203,7 @@ function addFriendsButton() {
       if (event.data?.type === "LEETCODE_USERNAME") {
         const username = event.data.username;
         const friendsContainer = popup.querySelector("#friends-container");
-        friendsContainer.innerHTML = '';
-        friendsContainer.style.overflowY = 'auto';
+        friendsContainer.style.overflowY = 'scroll';
         loadFriendsData(friendsContainer, username);
       }
     });
@@ -221,7 +221,7 @@ function addFriendsButton() {
         popup.style.top = (rect.bottom + window.scrollY + 12) + 'px';
         popup.style.right = '3px';
         popup.style.height = 'auto';
-        popup.style.maxHeight = (window.innerHeight - 3) + 'px';
+        popup.style.maxHeight = (window.innerHeight - 57) + 'px';
         const friendCenter = rect.left + rect.width / 2;
         const newWidth = (window.innerWidth - friendCenter - 3) * 2;
         popup.style.width = newWidth + 'px';
