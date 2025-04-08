@@ -29,36 +29,55 @@ function renderFriends(friendsData) {
   const container = document.getElementById('friends-container');
   container.innerHTML = '';
 
+  // Build a flat list of submissions from all friends
+  let submissions = [];
   friendsData.forEach(friend => {
+    if (friend.data?.recentAcSubmissions?.length > 0) {
+      friend.data.recentAcSubmissions.forEach(sub => {
+        submissions.push({
+          friend_username: friend.friend_username,
+          avatar: friend.data?.userPublicProfile?.profile?.userAvatar || '',
+          timestamp: Number(sub.timestamp),
+          title: sub.title
+        });
+      });
+    }
+  });
+
+  // Sort submissions by timestamp, most recent first
+  submissions.sort((a, b) => b.timestamp - a.timestamp);
+
+  // Create a card for each submission
+  submissions.forEach(item => {
     const card = document.createElement('div');
     card.style.border = '1px solid #ddd';
     card.style.borderRadius = '8px';
-    card.style.padding = '8px'; // Reduced padding for a more compact card
+    card.style.padding = '8px';
     card.style.background = '#fff';
     card.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
 
-    // Create header div with avatar, username, and latest submission info
+    // Create header div with avatar, username, and time ago
     const headerDiv = document.createElement('div');
     headerDiv.style.display = 'flex';
     headerDiv.style.alignItems = 'center';
     headerDiv.style.marginBottom = '4px';
-    headerDiv.style.justifyContent = 'space-between'; // Align items left and right
+    headerDiv.style.justifyContent = 'space-between';
 
     const avatar = document.createElement('img');
-    avatar.src = friend.data?.userPublicProfile?.profile?.userAvatar || '';
+    avatar.src = item.avatar;
     avatar.style.width = '30px';
     avatar.style.height = '30px';
     avatar.style.borderRadius = '50%';
     avatar.style.marginRight = '8px';
 
     const username = document.createElement('span');
-    username.textContent = friend.friend_username;
+    username.textContent = item.friend_username;
     username.style.fontSize = '14px';
     username.style.fontWeight = '600';
 
     // Create a clickable link that wraps the avatar and username
     const profileLink = document.createElement('a');
-    profileLink.href = `https://leetcode.com/u/${friend.friend_username}`;
+    profileLink.href = `https://leetcode.com/u/${item.friend_username}`;
     profileLink.target = '_blank';
     profileLink.style.display = 'flex';
     profileLink.style.alignItems = 'center';
@@ -69,52 +88,39 @@ function renderFriends(friendsData) {
     profileLink.appendChild(username);
     headerDiv.appendChild(profileLink);
 
-    // Compute "time ago" string and latest submission question title
+    // Compute relative "time ago" string for this submission
+    const now = new Date();
+    const submissionDate = new Date(item.timestamp * 1000);
+    let diffInSeconds = Math.floor((now - submissionDate) / 1000);
     let timeText = '';
-    let submissionTitle = '';
-    if (friend.data?.recentAcSubmissions?.length > 0) {
-      const sub = friend.data.recentAcSubmissions[0];
-      submissionTitle = sub.title;
-      const date = new Date(Number(sub.timestamp) * 1000);
-      const now = new Date();
-      const diffInSeconds = Math.floor((now - date) / 1000);
-      if (diffInSeconds < 60) {
-        timeText = 'just now';
-      } else if (diffInSeconds < 3600) {
-        const minutes = Math.floor(diffInSeconds / 60);
-        timeText = minutes + ' minute' + (minutes > 1 ? 's' : '') + ' ago';
-      } else if (diffInSeconds < 86400) {
-        const hours = Math.floor(diffInSeconds / 3600);
-        timeText = hours + ' hour' + (hours > 1 ? 's' : '') + ' ago';
-      } else {
-        const days = Math.floor(diffInSeconds / 86400);
-        timeText = days + ' day' + (days > 1 ? 's' : '') + ' ago';
-      }
+    if (diffInSeconds < 60) {
+      timeText = 'just now';
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      timeText = minutes + ' minute' + (minutes > 1 ? 's' : '') + ' ago';
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      timeText = hours + ' hour' + (hours > 1 ? 's' : '') + ' ago';
     } else {
-      timeText = 'No submissions';
-      submissionTitle = '';
+      const days = Math.floor(diffInSeconds / 86400);
+      timeText = days + ' day' + (days > 1 ? 's' : '') + ' ago';
     }
-
-    // Create a span to display the time ago aligned right in the header
     const timeSpan = document.createElement('span');
     timeSpan.style.fontSize = '13px';
     timeSpan.style.color = '#666';
     timeSpan.textContent = timeText;
     headerDiv.appendChild(timeSpan);
 
-    // Append the header to the card
     card.appendChild(headerDiv);
 
     // Create a div below the header for the submission question title
-    if (submissionTitle) {
-      const submissionTitleDiv = document.createElement('div');
-      submissionTitleDiv.style.fontSize = '13px';
-      submissionTitleDiv.style.color = '#666';
-      submissionTitleDiv.style.textAlign = 'left';
-      submissionTitleDiv.style.marginTop = '4px';
-      submissionTitleDiv.textContent = submissionTitle;
-      card.appendChild(submissionTitleDiv);
-    }
+    const submissionTitleDiv = document.createElement('div');
+    submissionTitleDiv.style.fontSize = '13px';
+    submissionTitleDiv.style.color = '#666';
+    submissionTitleDiv.style.textAlign = 'left';
+    submissionTitleDiv.style.marginTop = '4px';
+    submissionTitleDiv.textContent = item.title;
+    card.appendChild(submissionTitleDiv);
 
     container.appendChild(card);
   });
