@@ -55,8 +55,18 @@ function renderFriends(friendsData) {
     username.style.fontSize = '14px';
     username.style.fontWeight = '600';
 
-    headerDiv.appendChild(avatar);
-    headerDiv.appendChild(username);
+    // Create a clickable link that wraps the avatar and username
+    const profileLink = document.createElement('a');
+    profileLink.href = `https://leetcode.com/u/${friend.friend_username}`;
+    profileLink.target = '_blank';
+    profileLink.style.display = 'flex';
+    profileLink.style.alignItems = 'center';
+    profileLink.style.textDecoration = 'none';
+    profileLink.style.color = '#ffa116'; // Added line to change hyperlink color
+
+    profileLink.appendChild(avatar);
+    profileLink.appendChild(username);
+    headerDiv.appendChild(profileLink);
     card.appendChild(headerDiv);
 
     // Create a compact section to show only the most recent submission
