@@ -124,55 +124,29 @@ function addFriendsButton() {
         const leaderboardView = wrapper.querySelector("#leaderboard-view");
         const myFriendsView = wrapper.querySelector("#my-friends-view");
 
-        // Set initial active state
-        friendActivityTab.style.backgroundColor = "#ffa1161f";
-        friendActivityTab.style.color = "#ffa116";
-        leaderboardTab.style.backgroundColor = "white";
-        leaderboardTab.style.color = "#333";
-        myFriendsTab.style.backgroundColor = "white";
-        myFriendsTab.style.color = "#333";
+        const tabMapping = [
+          { button: friendActivityTab, view: friendsView },
+          { button: myFriendsTab, view: myFriendsView },
+          { button: leaderboardTab, view: leaderboardView },
+        ];
 
-        friendActivityTab.addEventListener("click", () => {
-          // Update button styles
-          friendActivityTab.style.backgroundColor = "#ffa1161f";
-          friendActivityTab.style.color = "#ffa116";
-          leaderboardTab.style.backgroundColor = "white";
-          leaderboardTab.style.color = "#333";
-          myFriendsTab.style.backgroundColor = "white";
-          myFriendsTab.style.color = "#333";
+        function updateActiveTab(activeButton) {
+          tabMapping.forEach(({ button, view }) => {
+            if (button === activeButton) {
+              button.style.backgroundColor = "#ffa1161f";
+              button.style.color = "#ffa116";
+              view.style.display = "block";
+            } else {
+              button.style.backgroundColor = "white";
+              button.style.color = "#333";
+              view.style.display = "none";
+            }
+          });
+        }
 
-          // Update view visibility
-          friendsView.style.display = "block";
-          leaderboardView.style.display = "none";
-          myFriendsView.style.display = "none";
-        });
-
-        leaderboardTab.addEventListener("click", () => {
-          // Update button styles
-          leaderboardTab.style.backgroundColor = "#ffa1161f";
-          leaderboardTab.style.color = "#ffa116";
-          friendActivityTab.style.backgroundColor = "white";
-          friendActivityTab.style.color = "#333";
-          myFriendsTab.style.backgroundColor = "white";
-          myFriendsTab.style.color = "#333";
-
-          // Update view visibility
-          leaderboardView.style.display = "block";
-          friendsView.style.display = "none";
-          myFriendsView.style.display = "none";
-        });
-
-        myFriendsTab.addEventListener("click", () => {
-          myFriendsTab.style.backgroundColor = "#ffa1161f";
-          myFriendsTab.style.color = "#ffa116";
-          friendActivityTab.style.backgroundColor = "white";
-          friendActivityTab.style.color = "#333";
-          leaderboardTab.style.backgroundColor = "white";
-          leaderboardTab.style.color = "#333";
-
-          myFriendsView.style.display = "block";
-          friendsView.style.display = "none";
-          leaderboardView.style.display = "none";
+        // Attach a single event listener to each tab button
+        tabMapping.forEach(({ button }) => {
+          button.addEventListener("click", () => updateActiveTab(button));
         });
       })
       .catch(error => {
