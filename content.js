@@ -127,7 +127,7 @@ function addFriendsButton() {
       .catch(error => {
         console.error("Failed to load external HTML:", error);
       });
-    
+
     const extractor_script = document.createElement("script");
     extractor_script.src = chrome.runtime.getURL("username_extractor.js");
     extractor_script.onload = () => extractor_script.remove();
@@ -176,7 +176,7 @@ function addFriendsButton() {
         setTimeout(() => {
           document.addEventListener("click", closeOnClickOutside);
         }, 0);
-        
+
         const closeOnEsc = (event) => {
           if (event.key === "Escape") {
             popup.style.opacity = "0";
