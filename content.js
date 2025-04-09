@@ -141,7 +141,7 @@ function renderFriendActivity(friendsData) {
       submissionTitleLink.style.color = '#ffa116';
       submissionTitleLink.style.textDecoration = 'underline';
     });
-  
+
     submissionTitleLink.addEventListener('mouseleave', () => {
       submissionTitleLink.style.color = document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
       submissionTitleLink.style.textDecoration = 'none';
@@ -267,8 +267,8 @@ function renderLeaderboard(currentUserData, friendsData) {
 }
 
 function renderMyFriendsGrid(friendsData) {
-  const myFriendsView = document.getElementById('my-friends-view');
-  myFriendsView.innerHTML = '';
+  const myFriendsContainer = document.getElementById('my-friends-container');
+  myFriendsContainer.innerHTML = '';
 
   const myFriendsGrid = document.createElement('div');
   myFriendsGrid.style.display = 'grid';
@@ -382,10 +382,58 @@ function renderMyFriendsGrid(friendsData) {
     myFriendsGrid.appendChild(card);
   });
 
-  myFriendsView.appendChild(myFriendsGrid);
+  myFriendsContainer.appendChild(myFriendsGrid);
 }
 
 function addFriendsButton() {
+  async function fetchFriendRequests(username) {
+    try {
+      const [incomingResponse, outgoingResponse] = await Promise.all([
+        fetch(`http://127.0.0.1:5000/friend-request/incoming?username=${username}`),
+        fetch(`http://127.0.0.1:5000/friend-request/outgoing?username=${username}`)
+      ]);
+      const incomingData = await incomingResponse.json();
+      const outgoingData = await outgoingResponse.json();
+      const incoming = incomingData.incoming_friend_requests || [];
+      const outgoing = outgoingData.outgoing_friend_requests || [];
+      // Removed redundant requestsContainer creation; using the container defined later.
+      const sectionTitle = (text) => {
+        const title = document.createElement('h4');
+        title.textContent = text;
+        title.style.margin = '8px 0 4px 0';
+        title.style.fontSize = '14px';
+        title.style.color = document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
+        return title;
+      };
+      const list = (requests, labelKey) => {
+        const ul = document.createElement('ul');
+        ul.style.paddingLeft = '16px';
+        ul.style.margin = '0';
+        requests.forEach(req => {
+          const li = document.createElement('li');
+          li.style.marginBottom = '4px';
+          li.textContent = req[labelKey];
+          ul.appendChild(li);
+        });
+        return ul;
+      };
+      const requestsContainer = document.querySelector("#friend-requests-container");
+      requestsContainer.innerHTML = '';
+      requestsContainer.appendChild(sectionTitle("Friend Requests"));
+      
+      if (incoming.length > 0) {
+        requestsContainer.appendChild(sectionTitle("Incoming Requests"));
+        requestsContainer.appendChild(list(incoming, 'sender_username'));
+      }
+      
+      if (outgoing.length > 0) {
+        requestsContainer.appendChild(sectionTitle("Outgoing Requests"));
+        requestsContainer.appendChild(list(outgoing, 'receiver_username'));
+      }
+    } catch (error) {
+      console.error("Failed to load friend requests:", error);
+    }
+  }
   window.addEventListener("pageshow", async () => {
     const isDark = document.documentElement.classList.contains("dark");
     const currentUrl = window.location.href;
@@ -420,12 +468,15 @@ function addFriendsButton() {
         const myFriendsTab = wrapper.querySelector("#my-friends-tab");
         const friendsView = wrapper.querySelector("#friend-activity-view");
         const leaderboardView = wrapper.querySelector("#leaderboard-view");
+        const friendRequestsTab = wrapper.querySelector("#friend-requests-tab");
+        const friendRequestsView = wrapper.querySelector("#friend-requests-view");
         const myFriendsView = wrapper.querySelector("#my-friends-view");
 
         const tabMapping = [
           { button: friendActivityTab, view: friendsView },
-          { button: myFriendsTab, view: myFriendsView },
           { button: leaderboardTab, view: leaderboardView },
+          { button: myFriendsTab, view: myFriendsView },
+          { button: friendRequestsTab, view: friendRequestsView },
         ];
 
         function updateActiveTab(activeButton) {
@@ -473,6 +524,7 @@ function addFriendsButton() {
         friendsContainer.style.setProperty('scrollbar-width', 'none');
         friendsContainer.style.setProperty('::-webkit-scrollbar', 'display: none');
         loadFriendsData(username);
+        fetchFriendRequests(username);
       }
     });
 
