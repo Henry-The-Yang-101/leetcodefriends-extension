@@ -161,11 +161,14 @@ function renderLeaderboard(currentUserData, friendsData) {
   const currentUsername = currentUserData.userPublicProfile?.profile?.realName || 'You';
   const currentRank = currentUserData.userPublicProfile?.profile?.ranking || Number.MAX_SAFE_INTEGER;
   const currentAvatar = currentUserData.userPublicProfile?.profile?.userAvatar || '';
+  const currentTotalSolved = currentUserData.userSessionStats?.submitStats?.acSubmissionNum?.find(s => s.difficulty === 'All')?.count || 0;
   users.push({
     username: currentUsername,
     avatar: currentAvatar,
     rank: currentRank,
-    isCurrentUser: true
+    isCurrentUser: true,
+    profileUrl: `https://leetcode.com/u/${currentUsername}`,
+    solved: currentTotalSolved
   });
 
   // Add friends
@@ -173,11 +176,14 @@ function renderLeaderboard(currentUserData, friendsData) {
     const username = friend.friend_username;
     const rank = friend.data?.userPublicProfile?.profile?.ranking || Number.MAX_SAFE_INTEGER;
     const avatar = friend.data?.userPublicProfile?.profile?.userAvatar || '';
+    const solved = friend.data?.userSessionStats?.submitStats?.acSubmissionNum?.find(s => s.difficulty === 'All')?.count || 0;
     users.push({
       username,
       avatar,
       rank,
-      isCurrentUser: false
+      isCurrentUser: false,
+      profileUrl: `https://leetcode.com/u/${username}`,
+      solved
     });
   });
 
@@ -222,10 +228,24 @@ function renderLeaderboard(currentUserData, friendsData) {
     const score = document.createElement('div');
     score.textContent = `Rank: ${user.rank}`;
 
+    const profileLink = document.createElement('a');
+    profileLink.href = user.profileUrl;
+    profileLink.target = '_blank';
+    profileLink.style.display = 'flex';
+    profileLink.style.alignItems = 'center';
+    profileLink.style.textDecoration = 'none';
+    profileLink.style.color = '#ffa116';
+    profileLink.style.gap = '8px';
+    profileLink.appendChild(avatarElem);
+    profileLink.appendChild(name);
+
     row.appendChild(rankElem);
-    row.appendChild(avatarElem);
-    row.appendChild(name);
+    row.appendChild(profileLink);
     row.appendChild(score);
+
+    const solvedElem = document.createElement('div');
+    solvedElem.textContent = `✅ Solved: ${user.solved}`;
+    row.appendChild(solvedElem);
 
     container.appendChild(row);
   });
