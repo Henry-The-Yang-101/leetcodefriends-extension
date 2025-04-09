@@ -412,11 +412,21 @@ function addFriendsButton() {
         card.style.fontFamily = '"Roboto Mono", monospace';
         card.style.boxShadow = '0 0 9px rgba(0, 0, 0, 0.2)';
 
-        const name = document.createElement('div');
-        name.textContent = req.sender_username || req.username;
-        name.style.fontSize = '14px';
-        name.style.fontWeight = 'bold';
-        name.style.color = document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
+        const profileLink = document.createElement('a');
+        profileLink.href = `https://leetcode.com/u/${req.sender_username}`;
+        profileLink.target = '_blank';
+        profileLink.textContent = req.sender_username;
+        profileLink.style.fontSize = '14px';
+        profileLink.style.fontWeight = 'bold';
+        profileLink.style.fontFamily = '"Roboto Mono", monospace';
+        profileLink.style.color = '#ffa116';
+        profileLink.style.textDecoration = 'none';
+        profileLink.addEventListener('mouseenter', () => {
+          profileLink.style.textDecoration = 'underline';
+        });
+        profileLink.addEventListener('mouseleave', () => {
+          profileLink.style.textDecoration = 'none';
+        });
 
         const actions = document.createElement('div');
         actions.style.display = 'flex';
@@ -466,7 +476,7 @@ function addFriendsButton() {
 
         actions.appendChild(acceptBtn);
         actions.appendChild(declineBtn);
-        card.appendChild(name);
+        card.appendChild(profileLink);
         card.appendChild(actions);
         requestsContainer.appendChild(card);
       });
