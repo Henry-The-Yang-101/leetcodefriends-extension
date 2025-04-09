@@ -237,7 +237,7 @@ function renderMyFriendsGrid(friendsData) {
 
     metadata.innerHTML = `
       🔥 Streak: ${streak} days<br>
-      📅 Last 7 days: ${last7DaySubmissions || 'None'} Solved<br>
+      📅 Last 7 days: ${last7DaySubmissions} Solved<br>
       🧠 Active days: ${totalActiveDays}<br>
       🌍 Rank: ${rank || 'N/A'}<br>
       ✅ Total AC: ${totalAC}<br>
