@@ -3,6 +3,42 @@
     font-family: sans-serif;
     box-sizing: border-box;
   ">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      body, div[style*="padding: 8px"] {
+        background-color: #1e1e1e !important;
+        color: #e0e0e0 !important;
+      }
+
+      #my-friends-tab,
+      #leaderboard-tab {
+        background-color: #2a2a2a !important;
+        color: #e0e0e0 !important;
+      }
+
+      #friend-activity-tab {
+        background-color: #ffa1161f !important;
+        color: #ffa116 !important;
+      }
+
+      #friends-container {
+        background-color: #1e1e1e !important;
+      }
+
+      #friends-container > div:nth-child(odd) {
+        background-color: #2a2a2a !important;
+      }
+
+      #friends-container > div:nth-child(even) {
+        background-color: #1f1f1f !important;
+      }
+
+      #my-friends-view,
+      #leaderboard-view {
+        color: #ccc !important;
+      }
+    }
+  </style>
   <h2 class="premiumBtnStyle__8s3V font-typo" style="margin-bottom: 12px; font-size: 18px;">Friends :D</h2>
   <div style="display: flex; justify-content: center;">
     <div style="
@@ -20,11 +56,11 @@
         🔔 Friend Activity
       </button>
       <button class="premiumBtnStyle__8s3V font-typo" id="my-friends-tab"
-        style="flex: 1; height: 32px; background: white; color: #333; border: none; cursor: pointer; outline: none;">
+        style="flex: 1; height: 32px; background: #ffffff; color: #333; border: none; cursor: pointer; outline: none;">
         👥 My Friends
       </button>
       <button class="premiumBtnStyle__8s3V font-typo" id="leaderboard-tab"
-        style="flex: 1; height: 32px; background: white; color: #333; border: none; cursor: pointer; outline: none;">
+        style="flex: 1; height: 32px; background: #ffffff; color: #333; border: none; cursor: pointer; outline: none;">
         🏆 Leaderboard
       </button>
     </div>
