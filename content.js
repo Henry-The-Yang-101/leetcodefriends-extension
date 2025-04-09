@@ -273,9 +273,10 @@ function renderMyFriendsGrid(friendsData) {
   const myFriendsGrid = document.createElement('div');
   myFriendsGrid.style.display = 'grid';
   myFriendsGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+  myFriendsGrid.style.justifyContent = 'center';
   myFriendsGrid.style.gap = '16px';
   myFriendsGrid.style.marginTop = '12px';
-  myFriendsGrid.style.justifyItems = 'center';
+  myFriendsGrid.style.placeItems = 'center';
 
   friendsData.forEach(friend => {
     const username = friend.friend_username;
@@ -289,6 +290,8 @@ function renderMyFriendsGrid(friendsData) {
     card.style.backgroundColor = document.documentElement.classList.contains("dark") ? "#2a2a2a" : "#ffffff";
     card.style.borderRadius = "8px";
     card.style.padding = "12px";
+    card.style.width = '100%';
+    card.style.boxSizing = 'border-box';
     // Removed hover effect from card
 
     const img = document.createElement('img');
@@ -301,6 +304,9 @@ function renderMyFriendsGrid(friendsData) {
     img.style.boxShadow = '0 0 9px rgba(0, 0, 0, 0.2)';
 
     const link = document.createElement('a');
+    link.style.display = 'flex';
+    link.style.flexDirection = 'column';
+    link.style.alignItems = 'center';
     link.href = `https://leetcode.com/u/${username}`;
     link.target = '_blank';
     link.style.textDecoration = 'none';
