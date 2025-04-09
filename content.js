@@ -732,17 +732,21 @@ function addFriendsButton() {
                 .then(data => {
                   if (data.message?.includes("registered")) {
                     loadFriendsData(username);
+                    const navbar = popup.querySelector("#friends-navbar");
+                    if (navbar) navbar.style.display = "flex";
                     fetchFriendRequests(username);
                   }
                 });
               };
         
               popupContent.appendChild(registerButton);
-            } else {
-              console.log(`${username} is registered!`)
-              loadFriendsData(username);
-              fetchFriendRequests(username);
-            }
+              } else {
+                console.log(`${username} is registered!`)
+                loadFriendsData(username);
+                const navbar = popup.querySelector("#friends-navbar");
+                if (navbar) navbar.style.display = "flex";
+                fetchFriendRequests(username);
+              }
           })
           .catch(err => console.error("Registration check failed", err));
         
