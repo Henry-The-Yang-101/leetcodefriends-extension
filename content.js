@@ -194,7 +194,7 @@ function renderMyFriendsGrid(friendsData) {
     const name = document.createElement('div');
     name.textContent = username;
     name.style.fontSize = '14px';
-    name.style.fontWeight = '500';
+    name.style.fontWeight = 'bold';
 
     link.appendChild(name);
 
