@@ -57,6 +57,7 @@ function renderFriends(friendsData) {
     card.style.margin = '8px 0'; // Added vertical spacing between cards
     card.style.background = '#fff';
     card.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+    card.style.fontFamily = '"Roboto Mono", monospace';
 
     // Create header div with avatar, username, and time ago
     const headerDiv = document.createElement('div');
