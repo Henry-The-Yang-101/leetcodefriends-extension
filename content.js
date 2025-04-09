@@ -404,6 +404,12 @@ async function fetchFriendRequests(username) {
     const outgoing = outgoingData.outgoing_friend_requests || [];
     const requestsContainer = document.querySelector("#friend-requests-container");
     requestsContainer.innerHTML = '';
+    if (incoming.length === 0) {
+      const emptyIncoming = document.createElement('div');
+      emptyIncoming.className = 'loading-indicator';
+      emptyIncoming.textContent = 'No incoming friend requests.';
+      requestsContainer.appendChild(emptyIncoming);
+    }
 
     incoming.forEach(req => {
       const card = document.createElement('div');
@@ -413,6 +419,8 @@ async function fetchFriendRequests(username) {
       card.style.alignItems = 'center';
       card.style.padding = '12px';
       card.style.marginBottom = '12px';
+      card.style.marginLeft = '2px';
+      card.style.marginRight = '2px';
       card.style.borderRadius = '8px';
       card.style.backgroundColor = document.documentElement.classList.contains("dark") ? "#2a2a2a" : "#ffffff";
       card.style.fontFamily = '"Roboto Mono", monospace';
@@ -487,16 +495,44 @@ async function fetchFriendRequests(username) {
       requestsContainer.appendChild(card);
     });
 
-    outgoing.forEach(req => {
-      const card = document.createElement('div');
-      card.className = 'request-card';
+    if (outgoing.length > 0) {
+      const toggle = document.createElement('button');
+      toggle.textContent = 'Outgoing Friend Requests ▾';
+      toggle.style.margin = '8px 4px';
+      toggle.style.padding = '6px 12px';
+      toggle.style.fontFamily = '"Roboto Mono", monospace';
+      toggle.style.fontSize = '14px';
+      toggle.style.cursor = 'pointer';
+      toggle.style.border = 'none';
+      toggle.style.backgroundColor = 'transparent';
+      toggle.style.color = '#ffa116';
+      toggle.style.textAlign = 'left';
 
-      const name = document.createElement('div');
-      name.textContent = `To: ${req.receiver_username}`;
+      const outgoingContainer = document.createElement('div');
+      outgoingContainer.style.display = 'none';
+      outgoingContainer.style.marginTop = '8px';
 
-      card.appendChild(name);
-      requestsContainer.appendChild(card);
-    });
+      toggle.addEventListener('click', () => {
+        const expanded = outgoingContainer.style.display === 'block';
+        outgoingContainer.style.display = expanded ? 'none' : 'block';
+        toggle.textContent = expanded ? 'Outgoing Friend Requests ▾' : 'Outgoing Friend Requests ▴';
+      });
+
+      outgoing.forEach(req => {
+        const card = document.createElement('div');
+        card.className = 'request-card';
+        card.style.marginLeft = '4px';
+        card.style.marginRight = '4px';
+        const name = document.createElement('div');
+        name.textContent = `To: ${req.receiver_username}`;
+        name.style.fontFamily = '"Roboto Mono", monospace';
+        card.appendChild(name);
+        outgoingContainer.appendChild(card);
+      });
+
+      requestsContainer.appendChild(toggle);
+      requestsContainer.appendChild(outgoingContainer);
+    }
   } catch (error) {
     console.error("Failed to load friend requests:", error);
   }
@@ -524,35 +560,37 @@ function addFriendsButton() {
     popup.style.zIndex = "9999";
     popup.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.4)";
     popup.style.backgroundColor = isDark ? "#1e1e1e" : "#ffffff";
-
+    let sendRequestInput;
+    let sendRequestButton;
+ 
     fetch(chrome.runtime.getURL("popup_content.html"))
       .then(response => response.text())
       .then(html => {
         const wrapper = document.createElement("div");
         wrapper.innerHTML = html;
         // Insert send friend request elements and listener here
-        const sendRequestInput = wrapper.querySelector("#send-friend-request-input");
-        const sendRequestButton = wrapper.querySelector("#send-friend-request-button");
+        sendRequestInput = wrapper.querySelector("#send-friend-request-input");
+        sendRequestButton = wrapper.querySelector("#send-friend-request-button");
 
-        sendRequestButton.addEventListener("click", () => {
-          const receiverUsername = sendRequestInput.value.trim();
-          if (!receiverUsername) return;
+        // sendRequestButton.addEventListener("click", () => {
+        //   const receiverUsername = sendRequestInput.value.trim();
+        //   if (!receiverUsername) return;
 
-          fetch("http://127.0.0.1:5000/friend-request/send", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              sender_username: username,
-              receiver_username: receiverUsername
-            })
-          })
-            .then((res) => res.json())
-            .then(() => {
-              sendRequestInput.value = "";
-              fetchFriendRequests(username);
-            })
-            .catch((error) => console.error("Failed to send friend request:", error));
-        });
+        //   fetch("http://127.0.0.1:5000/friend-request/send", {
+        //     method: "POST",
+        //     headers: { "Content-Type": "application/json" },
+        //     body: JSON.stringify({
+        //       sender_username: username,
+        //       receiver_username: receiverUsername
+        //     })
+        //   })
+        //     .then((res) => res.json())
+        //     .then(() => {
+        //       sendRequestInput.value = "";
+        //       fetchFriendRequests(username);
+        //     })
+        //     .catch((error) => console.error("Failed to send friend request:", error));
+        // });
         popup.appendChild(wrapper);
 
         const friendActivityTab = wrapper.querySelector("#friend-activity-tab");
@@ -617,6 +655,25 @@ function addFriendsButton() {
         friendsContainer.style.setProperty('::-webkit-scrollbar', 'display: none');
         loadFriendsData(username);
         fetchFriendRequests(username);
+        sendRequestButton.addEventListener("click", () => {
+          const receiverUsername = sendRequestInput.value.trim();
+          if (!receiverUsername) return;
+  
+          fetch("http://127.0.0.1:5000/friend-request/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sender_username: username,
+              receiver_username: receiverUsername
+            })
+          })
+            .then((res) => res.json())
+            .then(() => {
+              sendRequestInput.value = "";
+              fetchFriendRequests(username);
+            })
+            .catch((error) => console.error("Failed to send friend request:", error));
+        });
       }
     });
 
