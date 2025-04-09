@@ -540,7 +540,7 @@ async function fetchFriendRequests(username) {
 
     if (outgoing.length > 0) {
       const toggle = document.createElement('button');
-      toggle.textContent = 'Outgoing Friend Requests ▾';
+      toggle.textContent = `Outgoing Friend Requests (${outgoing.length}) ▾`;
       toggle.style.margin = '8px 4px';
       toggle.style.padding = '6px 12px';
       toggle.style.fontFamily = '"Roboto Mono", monospace';
@@ -566,7 +566,7 @@ async function fetchFriendRequests(username) {
       toggle.addEventListener('click', () => {
         const expanded = outgoingContainer.style.display === 'block';
         outgoingContainer.style.display = expanded ? 'none' : 'block';
-        toggle.textContent = expanded ? 'Outgoing Friend Requests ▾' : 'Outgoing Friend Requests ▴';
+        toggle.textContent = expanded ? `Outgoing Friend Requests (${outgoing.length}) ▾` : `Outgoing Friend Requests (${outgoing.length}) ▴`;
       });
 
       const outgoingText = document.createElement('div');
@@ -609,6 +609,7 @@ function addFriendsButton() {
     popup.style.backgroundColor = isDark ? "#1e1e1e" : "#ffffff";
     let sendRequestInput;
     let sendRequestButton;
+    let username;
  
     fetch(chrome.runtime.getURL("popup_content.html"))
       .then(response => response.text())
@@ -642,7 +643,7 @@ function addFriendsButton() {
         sendRequestButton.addEventListener('mouseleave', () => {
           sendRequestButton.style.backgroundColor = '#ffa116';
         });
-        sendRequestButton.addEventListener("click", () => {
+        function sendRequest() {
           const receiverUsername = sendRequestInput.value.trim();
           if (!receiverUsername) return;
         
@@ -660,6 +661,11 @@ function addFriendsButton() {
               fetchFriendRequests(username);
             })
             .catch((error) => console.error("Failed to send friend request:", error));
+        }
+        
+        sendRequestButton.addEventListener("click", sendRequest);
+        sendRequestInput.addEventListener("keypress", (event) => {
+          if (event.key === "Enter") sendRequest();
         });
 
         popup.appendChild(wrapper);
@@ -727,7 +733,7 @@ function addFriendsButton() {
     window.addEventListener("message", (event) => {
       if (event.source !== window) return;
       if (event.data?.type === "LEETCODE_USERNAME") {
-        const username = event.data.username;
+        username = event.data.username;
         console.log("Extracted username:", username);
         
         fetch(`https://127.0.0.1:5000/user-is-registered?username=${username}`)
