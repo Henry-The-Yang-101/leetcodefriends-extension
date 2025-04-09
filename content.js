@@ -437,10 +437,10 @@ function addFriendsButton() {
         console.error("Failed to load external HTML:", error);
       });
 
-    const extractor_script = document.createElement("script");
-    extractor_script.src = chrome.runtime.getURL("username_extractor.js");
-    extractor_script.onload = () => extractor_script.remove();
-    (document.head || document.documentElement).appendChild(extractor_script);
+    const obtainer_script = document.createElement("script");
+    obtainer_script.src = chrome.runtime.getURL("username_obtainer.js");
+    obtainer_script.onload = () => obtainer_script.remove();
+    (document.head || document.documentElement).appendChild(obtainer_script);
 
     window.addEventListener("message", (event) => {
       if (event.source !== window) return;
