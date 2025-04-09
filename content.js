@@ -36,12 +36,19 @@ function renderFriendActivity(friendsData) {
   const container = document.getElementById('friends-container');
   container.innerHTML = '';
     if (!friendsData || friendsData.length === 0) {
-      container.innerHTML = `
-        <div class="loading-indicator" style="padding: 64px 0; color: black;">
-          You currently have no friends :C<br>
-          <span style="font-size: 13px; color: black;">Go make some friends in the friend requests tab! 👉👉👉</span>
-        </div>
-      `;
+      const fallback = document.createElement('div');
+      fallback.className = 'loading-indicator';
+      fallback.style.padding = '64px 0';
+      fallback.style.color = document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+      fallback.style.fontSize = '16px';
+      fallback.textContent = 'You currently have no friends... :C';
+      const span = document.createElement('span');
+      span.style.fontSize = '13px';
+      span.style.color = document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+      span.textContent = 'Go make some friends in the friend requests tab! 👉👉👉';
+      fallback.appendChild(document.createElement('br'));
+      fallback.appendChild(span);
+      container.appendChild(fallback);
       return;
     }
 
@@ -166,12 +173,19 @@ function renderLeaderboard(currentUserData, friendsData) {
   const leaderboardContainer = document.querySelector('#leaderboard-container');
   leaderboardContainer.innerHTML = '';
   if (!friendsData || friendsData.length === 0) {
-    leaderboardContainer.innerHTML = `
-      <div class="loading-indicator" style="padding: 64px 0; color: black;">
-        You currently have no friends :C<br>
-        <span style="font-size: 13px; color: black;">Go make some friends in the friend requests tab! 👉👉👉</span>
-      </div>
-    `;
+    const fallback = document.createElement('div');
+    fallback.className = 'loading-indicator';
+    fallback.style.padding = '64px 0';
+    fallback.style.color = document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+    fallback.style.fontSize = '16px';
+    fallback.textContent = 'You currently have no friends... :C';
+    const span = document.createElement('span');
+    span.style.fontSize = '13px';
+    span.style.color = document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+    span.textContent = 'Go make some friends in the friend requests tab! 👉👉👉';
+    fallback.appendChild(document.createElement('br'));
+    fallback.appendChild(span);
+    leaderboardContainer.appendChild(fallback);
     return;
   }
 
@@ -299,7 +313,8 @@ function renderMyFriendsGrid(friendsData) {
     fallback.className = 'loading-indicator';
     fallback.style.padding = '64px 0';
     fallback.style.color = document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
-    fallback.textContent = 'You currently have no friends :C';
+    fallback.style.fontSize = '16px';
+    fallback.textContent = 'You currently have no friends... :C';
     const span = document.createElement('span');
     span.style.fontSize = '13px';
     span.style.color = document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
