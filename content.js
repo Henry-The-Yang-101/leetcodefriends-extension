@@ -13,13 +13,19 @@ async function waitForElement(selector) {
 async function loadFriendsData(username) {
   console.log('Loading friends data for:', username);
   try {
-    const response = await fetch(`http://127.0.0.1:5000/friends?username=${username}`);
-    const result = await response.json();
-    if (result.friends) {
-      renderFriendActivity(result.friends);
-      renderMyFriendsGrid(result.friends);
+    const [friendsResponse, userResponse] = await Promise.all([
+      fetch(`http://127.0.0.1:5000/friends?username=${username}`),
+      fetch(`http://127.0.0.1:5000/user-data?username=${username}`)
+    ]);
+    const friendsResult = await friendsResponse.json();
+    const userResult = await userResponse.json();
+
+    if (friendsResult.friends) {
+      renderFriendActivity(friendsResult.friends);
+      renderMyFriendsGrid(friendsResult.friends);
+      renderLeaderboard(userResult.data, friendsResult.friends);
     } else {
-      console.error('No friends data found in response', result);
+      console.error('No friends data found in response', friendsResult);
     }
   } catch (error) {
     console.error('Failed to load friends data:', error);
@@ -143,6 +149,88 @@ function renderFriendActivity(friendsData) {
 
     container.appendChild(card);
   });
+}
+
+function renderLeaderboard(currentUserData, friendsData) {
+  const leaderboardView = document.getElementById('leaderboard-view');
+  leaderboardView.innerHTML = '';
+
+  const users = [];
+
+  // Add the current user
+  const currentUsername = currentUserData.userPublicProfile?.profile?.realName || 'You';
+  const currentRank = currentUserData.userPublicProfile?.profile?.ranking || Number.MAX_SAFE_INTEGER;
+  const currentAvatar = currentUserData.userPublicProfile?.profile?.userAvatar || '';
+  users.push({
+    username: currentUsername,
+    avatar: currentAvatar,
+    rank: currentRank,
+    isCurrentUser: true
+  });
+
+  // Add friends
+  friendsData.forEach(friend => {
+    const username = friend.friend_username;
+    const rank = friend.data?.userPublicProfile?.profile?.ranking || Number.MAX_SAFE_INTEGER;
+    const avatar = friend.data?.userPublicProfile?.profile?.userAvatar || '';
+    users.push({
+      username,
+      avatar,
+      rank,
+      isCurrentUser: false
+    });
+  });
+
+  // Sort users by rank (ascending)
+  users.sort((a, b) => a.rank - b.rank);
+
+  // Create leaderboard container
+  const container = document.createElement('div');
+  container.style.display = 'flex';
+  container.style.flexDirection = 'column';
+  container.style.gap = '12px';
+  container.style.marginTop = '12px';
+  container.style.fontFamily = '"Roboto Mono", monospace';
+
+  users.forEach((user, index) => {
+    const row = document.createElement('div');
+    row.style.display = 'flex';
+    row.style.alignItems = 'center';
+    row.style.gap = '12px';
+    row.style.padding = '8px';
+    row.style.borderRadius = '6px';
+    row.style.background = user.isCurrentUser ? '#ffe8cc' : '#f8f8f8';
+    row.style.boxShadow = '0 0 4px rgba(0,0,0,0.1)';
+
+    const rankElem = document.createElement('div');
+    rankElem.textContent = `#${index + 1}`;
+    rankElem.style.width = '30px';
+    rankElem.style.textAlign = 'center';
+
+    const avatarElem = document.createElement('img');
+    avatarElem.src = user.avatar;
+    avatarElem.alt = user.username;
+    avatarElem.style.width = '30px';
+    avatarElem.style.height = '30px';
+    avatarElem.style.borderRadius = '50%';
+
+    const name = document.createElement('div');
+    name.textContent = user.username;
+    name.style.fontWeight = user.isCurrentUser ? 'bold' : 'normal';
+    name.style.flexGrow = '1';
+
+    const score = document.createElement('div');
+    score.textContent = `Rank: ${user.rank}`;
+
+    row.appendChild(rankElem);
+    row.appendChild(avatarElem);
+    row.appendChild(name);
+    row.appendChild(score);
+
+    container.appendChild(row);
+  });
+
+  leaderboardView.appendChild(container);
 }
 
 function renderMyFriendsGrid(friendsData) {
