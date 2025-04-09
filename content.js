@@ -165,14 +165,7 @@ function renderMyFriendsGrid(friendsData) {
     card.style.flexDirection = 'column';
     card.style.alignItems = 'center';
     card.style.fontFamily = '"Roboto Mono", monospace';
-    card.style.transition = 'transform 0.2s ease';
-
-    card.addEventListener('mouseenter', () => {
-      card.style.transform = 'scale(1.05)';
-    });
-    card.addEventListener('mouseleave', () => {
-      card.style.transform = 'scale(1)';
-    });
+    // Removed hover effect from card
 
     const img = document.createElement('img');
     img.src = avatarUrl;
@@ -190,6 +183,13 @@ function renderMyFriendsGrid(friendsData) {
     link.style.color = '#ffa116';
     link.style.fontFamily = '"Roboto Mono", monospace';
     link.style.textAlign = 'center';
+    link.style.transition = 'transform 0.2s ease';
+    link.addEventListener('mouseenter', () => {
+      link.style.transform = 'scale(1.05)';
+    });
+    link.addEventListener('mouseleave', () => {
+      link.style.transform = 'scale(1)';
+    });
 
     const name = document.createElement('div');
     name.textContent = username;
@@ -237,13 +237,13 @@ function renderMyFriendsGrid(friendsData) {
 
     metadata.innerHTML = `
       🔥 Streak: ${streak} days<br>
-      📅 Last 7 days: ${last7DaySubmissions} Qs<br>
+      📅 Last 7 days: ${last7DaySubmissions} Solved<br>
       🧠 Active days: ${totalActiveDays}<br>
       🌍 Rank: ${rank || 'N/A'}<br>
       ✅ Total AC: ${totalAC}<br>
-      🟢 Easy: ${easyAC}<br>
-      🟠 Med: ${mediumAC}<br>
-      🔴 Hard: ${hardAC}
+      🟢 Easy AC: ${easyAC}<br>
+      🟠 Med AC: ${mediumAC}<br>
+      🔴 Hard AC: ${hardAC}
     `;
 
     card.appendChild(metadata);
