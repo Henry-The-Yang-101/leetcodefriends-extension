@@ -225,8 +225,6 @@ function renderLeaderboard(currentUserData, friendsData) {
     name.style.fontWeight = user.isCurrentUser ? 'bold' : 'normal';
     name.style.flexGrow = '1';
 
-    const score = document.createElement('div');
-    score.textContent = `Rank: ${user.rank}`;
 
     const profileLink = document.createElement('a');
     profileLink.href = user.profileUrl;
@@ -241,11 +239,22 @@ function renderLeaderboard(currentUserData, friendsData) {
 
     row.appendChild(rankElem);
     row.appendChild(profileLink);
-    row.appendChild(score);
+    const statWrapper = document.createElement('div');
+    statWrapper.style.display = 'flex';
+    statWrapper.style.flexDirection = 'column';
+    statWrapper.style.alignItems = 'flex-end';
+    statWrapper.style.textAlign = 'right';
+    statWrapper.style.marginLeft = 'auto';
 
     const solvedElem = document.createElement('div');
     solvedElem.textContent = `✅ Solved: ${user.solved}`;
-    row.appendChild(solvedElem);
+
+    const score = document.createElement('div');
+    score.textContent = `Rank: ${user.rank}`;
+
+    statWrapper.appendChild(solvedElem);
+    statWrapper.appendChild(score);
+    row.appendChild(statWrapper);
 
     container.appendChild(row);
   });
