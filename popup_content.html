@@ -12,15 +12,9 @@
         color: #e0e0e0 !important;
       }
 
-      #my-friends-tab,
-      #leaderboard-tab {
-        background-color: #2a2a2a;
-        color: #e0e0e0;
-      }
-
-      #friend-activity-tab {
-        background-color: #ffa1161f;
-        color: #ffa116;
+      .active-tab {
+        background-color: transparent !important;
+        color: #ffa116 !important;
       }
 
       #friends-container {
@@ -43,6 +37,11 @@
       #friend-requests-view {
         color: #ccc !important;
       }
+
+      #friends-navbar {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+      }
     }
 
     .loading-indicator {
@@ -64,7 +63,7 @@
         overflow: hidden;
         flex: 2;
       ">
-      <button class="premiumBtnStyle__8s3V font-typo" id="friend-activity-tab"
+      <button class="premiumBtnStyle__8s3V font-typo active-tab" id="friend-activity-tab"
         style="flex: 1; height: 32px; border: none; cursor: pointer; outline: none;">
         🔔 Activity
       </button>

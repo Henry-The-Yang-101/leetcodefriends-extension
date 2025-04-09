@@ -37,9 +37,9 @@ function renderFriendActivity(friendsData) {
   container.innerHTML = '';
     if (!friendsData || friendsData.length === 0) {
       container.innerHTML = `
-        <div class="loading-indicator" style="padding: 64px 0;">
+        <div class="loading-indicator" style="padding: 64px 0; color: black;">
           You currently have no friends :C<br>
-          <span style="font-size: 13px; color: #aaa;">Go make some friends in the friend requests tab! 👉👉👉</span>
+          <span style="font-size: 13px; color: black;">Go make some friends in the friend requests tab! 👉👉👉</span>
         </div>
       `;
       return;
@@ -167,9 +167,9 @@ function renderLeaderboard(currentUserData, friendsData) {
   leaderboardContainer.innerHTML = '';
   if (!friendsData || friendsData.length === 0) {
     leaderboardContainer.innerHTML = `
-      <div class="loading-indicator" style="padding: 64px 0;">
+      <div class="loading-indicator" style="padding: 64px 0; color: black;">
         You currently have no friends :C<br>
-        <span style="font-size: 13px; color: #aaa;">Go make some friends in the friend requests tab! 👉👉👉</span>
+        <span style="font-size: 13px; color: black;">Go make some friends in the friend requests tab! 👉👉👉</span>
       </div>
     `;
     return;
@@ -295,12 +295,18 @@ function renderMyFriendsGrid(friendsData) {
   const myFriendsContainer = document.getElementById('my-friends-container');
   myFriendsContainer.innerHTML = '';
   if (!friendsData || friendsData.length === 0) {
-    myFriendsContainer.innerHTML = `
-      <div class="loading-indicator" style="padding: 64px 0;">
-        You currently have no friends :C<br>
-        <span style="font-size: 13px; color: #aaa;">Go make some friends in the friend requests tab! 👉👉👉</span>
-      </div>
-    `;
+    const fallback = document.createElement('div');
+    fallback.className = 'loading-indicator';
+    fallback.style.padding = '64px 0';
+    fallback.style.color = document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+    fallback.textContent = 'You currently have no friends :C';
+    const span = document.createElement('span');
+    span.style.fontSize = '13px';
+    span.style.color = document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+    span.textContent = 'Go make some friends in the friend requests tab! 👉👉👉';
+    fallback.appendChild(document.createElement('br'));
+    fallback.appendChild(span);
+    myFriendsContainer.appendChild(fallback);
     return;
   }
 
@@ -685,6 +691,7 @@ function addFriendsButton() {
           { button: myFriendsTab, view: myFriendsView },
           { button: friendRequestsTab, view: friendRequestsView },
         ];
+        updateActiveTab(friendActivityTab);
         tabMapping.forEach(({ button }) => {
           const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
           button.style.transition = 'background-color 0.2s ease, color 0.2s ease';
