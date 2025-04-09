@@ -164,6 +164,7 @@ function renderMyFriendsGrid(friendsData) {
     card.style.display = 'flex';
     card.style.flexDirection = 'column';
     card.style.alignItems = 'center';
+    card.style.fontFamily = '"Roboto Mono", monospace';
 
     const img = document.createElement('img');
     img.src = avatarUrl;
@@ -173,14 +174,23 @@ function renderMyFriendsGrid(friendsData) {
     img.style.borderRadius = '50%';
     img.style.marginBottom = '8px';
 
+    const link = document.createElement('a');
+    link.href = `https://leetcode.com/u/${username}`;
+    link.target = '_blank';
+    link.style.textDecoration = 'none';
+    link.style.color = '#ffa116';
+    link.style.fontFamily = '"Roboto Mono", monospace';
+    link.style.textAlign = 'center';
+
     const name = document.createElement('div');
     name.textContent = username;
     name.style.fontSize = '14px';
     name.style.fontWeight = '500';
-    name.style.textAlign = 'center';
+
+    link.appendChild(name);
 
     card.appendChild(img);
-    card.appendChild(name);
+    card.appendChild(link);
     myFriendsGrid.appendChild(card);
   });
 
