@@ -455,6 +455,7 @@ async function fetchFriendRequests(username) {
       acceptBtn.style.padding = '6px 12px';
       acceptBtn.style.fontFamily = '"Roboto Mono", monospace';
       acceptBtn.style.cursor = 'pointer';
+      acceptBtn.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
       acceptBtn.addEventListener('mouseenter', () => {
         acceptBtn.style.backgroundColor = '#218838';
       });
@@ -483,6 +484,7 @@ async function fetchFriendRequests(username) {
       declineBtn.style.padding = '6px 12px';
       declineBtn.style.fontFamily = '"Roboto Mono", monospace';
       declineBtn.style.cursor = 'pointer';
+      declineBtn.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
       declineBtn.addEventListener('mouseenter', () => {
         declineBtn.style.backgroundColor = '#c82333';
       });
@@ -521,6 +523,7 @@ async function fetchFriendRequests(username) {
       toggle.style.color = '#000';
       toggle.style.borderRadius = '8px';
       toggle.style.textAlign = 'left';
+      toggle.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
       toggle.addEventListener('mouseenter', () => {
         toggle.style.backgroundColor = '#d5d5d5';
       });
@@ -589,6 +592,7 @@ function addFriendsButton() {
         sendRequestInput = wrapper.querySelector("#send-friend-request-input");
         sendRequestButton = wrapper.querySelector("#send-friend-request-button");
         sendRequestButton.style.transition = 'background-color 0.2s ease';
+        sendRequestButton.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
         sendRequestButton.addEventListener('mouseenter', () => {
           sendRequestButton.style.backgroundColor = '#e69500';
         });
@@ -698,13 +702,13 @@ function addFriendsButton() {
                   if (data.message?.includes("registered")) {
                     loadFriendsData(username);
                     fetchFriendRequests(username);
-                    console.log(`${username} is registered!`)
                   }
                 });
               };
         
               popupContent.appendChild(registerButton);
             } else {
+              console.log(`${username} is registered!`)
               loadFriendsData(username);
               fetchFriendRequests(username);
             }
