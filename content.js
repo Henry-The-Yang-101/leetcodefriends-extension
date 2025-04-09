@@ -423,14 +423,15 @@ function addFriendsButton() {
         ];
 
         function updateActiveTab(activeButton) {
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
           tabMapping.forEach(({ button, view }) => {
             if (button === activeButton) {
               button.style.backgroundColor = "#ffa1161f";
               button.style.color = "#ffa116";
               view.style.display = "block";
             } else {
-          button.style.backgroundColor = "white";
-          button.style.color = document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
+              button.style.backgroundColor = isDarkMode ? "#2a2a2a" : "#ffffff";
+              button.style.color = isDarkMode ? "#e0e0e0" : "#333";
               view.style.display = "none";
             }
           });
