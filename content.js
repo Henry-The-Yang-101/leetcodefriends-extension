@@ -588,6 +588,22 @@ function addFriendsButton() {
       .then(html => {
         const wrapper = document.createElement("div");
         wrapper.innerHTML = html;
+        const tabBar = wrapper.querySelector("div[style*='display: flex'][style*='justify-content: center'] > div");
+        tabBar.style.position = "relative";
+        tabBar.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.2)";
+        tabBar.style.borderRadius = "8px";
+        tabBar.style.overflow = "hidden";
+
+        const tabHighlight = document.createElement("div");
+        tabHighlight.style.position = "absolute";
+        tabHighlight.style.top = "0";
+        tabHighlight.style.left = "0";
+        tabHighlight.style.height = "100%";
+        tabHighlight.style.width = "25%";
+        tabHighlight.style.backgroundColor = "#ffa1161f";
+        tabHighlight.style.borderRadius = "8px";
+        tabHighlight.style.transition = "left 0.3s ease";
+        tabBar.insertBefore(tabHighlight, tabBar.firstChild);
         // Insert send friend request elements and listener here
         sendRequestInput = wrapper.querySelector("#send-friend-request-input");
         sendRequestButton = wrapper.querySelector("#send-friend-request-button");
@@ -639,15 +655,13 @@ function addFriendsButton() {
 
         function updateActiveTab(activeButton) {
           const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          tabMapping.forEach(({ button, view }) => {
-            if (button === activeButton) {
-              button.style.backgroundColor = "#ffa1161f";
-              button.style.color = "#ffa116";
-              view.style.display = "block";
-            } else {
-              button.style.backgroundColor = isDarkMode ? "#2a2a2a" : "#ffffff";
-              button.style.color = isDarkMode ? "#e0e0e0" : "#333";
-              view.style.display = "none";
+          tabMapping.forEach(({ button, view }, index) => {
+            const isActive = button === activeButton;
+            button.style.backgroundColor = isActive ? "transparent" : (isDarkMode ? "#2a2a2a" : "#ffffff");
+            button.style.color = isActive ? "#ffa116" : (isDarkMode ? "#e0e0e0" : "#333");
+            view.style.display = isActive ? "block" : "none";
+            if (isActive) {
+              tabHighlight.style.left = `${index * 25}%`;
             }
           });
         }
