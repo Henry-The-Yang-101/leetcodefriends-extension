@@ -10,13 +10,13 @@ async function waitForElement(selector) {
   });
 }
 
-async function loadFriendsData(container, username) {
+async function loadFriendsData(username) {
   console.log('Loading friends data for:', username);
   try {
     const response = await fetch(`http://127.0.0.1:5000/friends?username=${username}`);
     const result = await response.json();
     if (result.friends) {
-      renderFriends(result.friends, container);
+      renderFriendActivity(result.friends);
     } else {
       console.error('No friends data found in response', result);
     }
@@ -25,7 +25,7 @@ async function loadFriendsData(container, username) {
   }
 }
 
-function renderFriends(friendsData) {
+function renderFriendActivity(friendsData) {
   const container = document.getElementById('friends-container');
   container.innerHTML = '';
 
@@ -229,7 +229,7 @@ function addFriendsButton() {
         friendsContainer.style.marginRight = '-4px';
         friendsContainer.style.setProperty('scrollbar-width', 'none');
         friendsContainer.style.setProperty('::-webkit-scrollbar', 'display: none');
-        loadFriendsData(friendsContainer, username);
+        loadFriendsData(username);
       }
     });
 
