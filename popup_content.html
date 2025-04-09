@@ -5,7 +5,9 @@
   ">
   <style>
     @media (prefers-color-scheme: dark) {
-      body, div[style*="padding: 8px"] {
+
+      body,
+      div[style*="padding: 8px"] {
         background-color: #1e1e1e !important;
         color: #e0e0e0 !important;
       }
@@ -25,16 +27,20 @@
         background-color: #1e1e1e !important;
       }
 
-      #friends-container > div:nth-child(odd) {
+      #friends-container>div:nth-child(odd) {
         background-color: #2a2a2a !important;
       }
 
-      #friends-container > div:nth-child(even) {
+      #friends-container>div:nth-child(even) {
         background-color: #1f1f1f !important;
       }
 
       #my-friends-view,
       #leaderboard-view {
+        color: #ccc !important;
+      }
+
+      #friend-requests-view {
         color: #ccc !important;
       }
     }
@@ -53,25 +59,32 @@
       ">
       <button class="premiumBtnStyle__8s3V font-typo" id="friend-activity-tab"
         style="flex: 1; height: 32px; border: none; cursor: pointer; outline: none;">
-        🔔 Friend Activity
-      </button>
-      <button class="premiumBtnStyle__8s3V font-typo" id="my-friends-tab"
-        style="flex: 1; height: 32px; border: none; cursor: pointer; outline: none;">
-        👥 My Friends
+        🔔 Activity
       </button>
       <button class="premiumBtnStyle__8s3V font-typo" id="leaderboard-tab"
         style="flex: 1; height: 32px; border: none; cursor: pointer; outline: none;">
         🏆 Leaderboard
       </button>
+      <button class="premiumBtnStyle__8s3V font-typo" id="my-friends-tab"
+        style="flex: 1; height: 32px; border: none; cursor: pointer; outline: none;">
+        👥 My Friends
+      </button>
+      <button class="premiumBtnStyle__8s3V font-typo" id="friend-requests-tab"
+        style="flex: 1; height: 32px; border: none; cursor: pointer; outline: none;">
+        📨 Friend Requests
+      </button>
     </div>
   </div>
   <div id="friend-activity-view" style="display: block;">
-  <div id="friends-container" style="max-height: 70vh; overflow-y: auto;"></div>
+    <div id="friends-container" style="max-height: 70vh; overflow-y: auto;"></div>
   </div>
-  <div id="my-friends-view" style="display: none;">
-    <p style="color: #999;">my friends content</p>
+  <div id="my-friends-view" style="display: none; max-height: 70vh; overflow-y: auto;">
+    <div id="my-friends-container"></div>
   </div>
   <div id="leaderboard-view" style="display: none;">
     <p style="color: #999;">meow meow</p>
+  </div>
+  <div id="friend-requests-view" style="display: none; max-height: 70vh; overflow-y: auto;">
+    <div id="friend-requests-container" style="margin: 8px 0;"></div>
   </div>
 </div>
