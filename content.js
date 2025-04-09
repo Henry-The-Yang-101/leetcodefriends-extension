@@ -539,9 +539,8 @@ async function fetchFriendRequests(username) {
         toggle.textContent = expanded ? 'Outgoing Friend Requests ▾' : 'Outgoing Friend Requests ▴';
       });
 
-      const outgoingUsernames = outgoing.map(req => req.receiver_username).join(', ');
       const outgoingText = document.createElement('div');
-      outgoingText.textContent = `To: ${outgoingUsernames}`;
+      outgoingText.textContent = outgoing.map(req => req.receiver_username).join(', ');
       outgoingText.style.fontFamily = '"Roboto Mono", monospace';
       outgoingText.style.marginLeft = '4px';
       outgoingText.style.marginRight = '4px';
