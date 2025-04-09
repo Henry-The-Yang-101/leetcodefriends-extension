@@ -455,6 +455,12 @@ async function fetchFriendRequests(username) {
       acceptBtn.style.padding = '6px 12px';
       acceptBtn.style.fontFamily = '"Roboto Mono", monospace';
       acceptBtn.style.cursor = 'pointer';
+      acceptBtn.addEventListener('mouseenter', () => {
+        acceptBtn.style.backgroundColor = '#218838';
+      });
+      acceptBtn.addEventListener('mouseleave', () => {
+        acceptBtn.style.backgroundColor = '#28a745';
+      });
 
       acceptBtn.onclick = () => {
         fetch('http://127.0.0.1:5000/friend-request/accept', {
@@ -476,6 +482,12 @@ async function fetchFriendRequests(username) {
       declineBtn.style.padding = '6px 12px';
       declineBtn.style.fontFamily = '"Roboto Mono", monospace';
       declineBtn.style.cursor = 'pointer';
+      declineBtn.addEventListener('mouseenter', () => {
+        declineBtn.style.backgroundColor = '#c82333';
+      });
+      declineBtn.addEventListener('mouseleave', () => {
+        declineBtn.style.backgroundColor = '#dc3545';
+      });
 
       declineBtn.onclick = () => {
         fetch('http://127.0.0.1:5000/friend-request/decline', {
@@ -507,6 +519,12 @@ async function fetchFriendRequests(username) {
       toggle.style.color = '#000';
       toggle.style.borderRadius = '8px';
       toggle.style.textAlign = 'left';
+      toggle.addEventListener('mouseenter', () => {
+        toggle.style.backgroundColor = '#d5d5d5';
+      });
+      toggle.addEventListener('mouseleave', () => {
+        toggle.style.backgroundColor = '#e0e0e0';
+      });
 
       const outgoingContainer = document.createElement('div');
       outgoingContainer.style.display = 'none';
