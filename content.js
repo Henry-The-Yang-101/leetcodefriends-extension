@@ -35,6 +35,15 @@ async function loadFriendsData(username) {
 function renderFriendActivity(friendsData) {
   const container = document.getElementById('friends-container');
   container.innerHTML = '';
+    if (!friendsData || friendsData.length === 0) {
+      container.innerHTML = `
+        <div class="loading-indicator" style="padding: 64px 0;">
+          you currently have no friends :(<br>
+          <span style="font-size: 13px; color: #aaa;">Go make some friends in the friend requests tab! 👉👉👉</span>
+        </div>
+      `;
+      return;
+    }
 
   // Build a flat list of submissions from all friends
   let submissions = [];
@@ -156,6 +165,15 @@ function renderFriendActivity(friendsData) {
 function renderLeaderboard(currentUserData, friendsData) {
   const leaderboardContainer = document.querySelector('#leaderboard-container');
   leaderboardContainer.innerHTML = '';
+  if (!friendsData || friendsData.length === 0) {
+    leaderboardContainer.innerHTML = `
+      <div class="loading-indicator" style="padding: 64px 0;">
+        you currently have no friends :(<br>
+        <span style="font-size: 13px; color: #aaa;">Go make some friends in the friend requests tab! 👉👉👉</span>
+      </div>
+    `;
+    return;
+  }
 
   const users = [];
 
@@ -276,6 +294,15 @@ function renderLeaderboard(currentUserData, friendsData) {
 function renderMyFriendsGrid(friendsData) {
   const myFriendsContainer = document.getElementById('my-friends-container');
   myFriendsContainer.innerHTML = '';
+  if (!friendsData || friendsData.length === 0) {
+    myFriendsContainer.innerHTML = `
+      <div class="loading-indicator" style="padding: 64px 0;">
+        you currently have no friends :(<br>
+        <span style="font-size: 13px; color: #aaa;">Go make some friends in the friend requests tab! 👉👉👉</span>
+      </div>
+    `;
+    return;
+  }
 
   const myFriendsGrid = document.createElement('div');
   myFriendsGrid.style.display = 'grid';
