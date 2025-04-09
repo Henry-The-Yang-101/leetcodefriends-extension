@@ -154,8 +154,8 @@ function renderFriendActivity(friendsData) {
 }
 
 function renderLeaderboard(currentUserData, friendsData) {
-  const leaderboardContainer = document.getElementById('leaderboard-container');
-  leaderboardView.innerHTML = '';
+  const leaderboardContainer = document.querySelector('#leaderboard-container');
+  leaderboardContainer.innerHTML = '';
 
   const users = [];
 
@@ -263,6 +263,13 @@ function renderLeaderboard(currentUserData, friendsData) {
     container.appendChild(row);
   });
 
+  if (users.length === 0) {
+    const emptyMessage = document.createElement('div');
+    emptyMessage.className = 'loading-indicator';
+    emptyMessage.textContent = 'No leaderboard data available.';
+    leaderboardContainer.appendChild(emptyMessage);
+    return;
+  }
   leaderboardContainer.appendChild(container);
 }
 
