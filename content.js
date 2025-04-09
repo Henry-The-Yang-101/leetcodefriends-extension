@@ -461,6 +461,7 @@ async function fetchFriendRequests(username) {
       acceptBtn.addEventListener('mouseleave', () => {
         acceptBtn.style.backgroundColor = '#28a745';
       });
+      acceptBtn.style.transition = 'background-color 0.2s ease';
 
       acceptBtn.onclick = () => {
         fetch('http://127.0.0.1:5000/friend-request/accept', {
@@ -488,6 +489,7 @@ async function fetchFriendRequests(username) {
       declineBtn.addEventListener('mouseleave', () => {
         declineBtn.style.backgroundColor = '#dc3545';
       });
+      declineBtn.style.transition = 'background-color 0.2s ease';
 
       declineBtn.onclick = () => {
         fetch('http://127.0.0.1:5000/friend-request/decline', {
@@ -525,6 +527,7 @@ async function fetchFriendRequests(username) {
       toggle.addEventListener('mouseleave', () => {
         toggle.style.backgroundColor = '#e0e0e0';
       });
+      toggle.style.transition = 'background-color 0.2s ease';
 
       const outgoingContainer = document.createElement('div');
       outgoingContainer.style.display = 'none';
@@ -536,17 +539,14 @@ async function fetchFriendRequests(username) {
         toggle.textContent = expanded ? 'Outgoing Friend Requests ▾' : 'Outgoing Friend Requests ▴';
       });
 
-      outgoing.forEach(req => {
-        const card = document.createElement('div');
-        card.className = 'request-card';
-        card.style.marginLeft = '4px';
-        card.style.marginRight = '4px';
-        const name = document.createElement('div');
-        name.textContent = `To: ${req.receiver_username}`;
-        name.style.fontFamily = '"Roboto Mono", monospace';
-        card.appendChild(name);
-        outgoingContainer.appendChild(card);
-      });
+      const outgoingUsernames = outgoing.map(req => req.receiver_username).join(', ');
+      const outgoingText = document.createElement('div');
+      outgoingText.textContent = `To: ${outgoingUsernames}`;
+      outgoingText.style.fontFamily = '"Roboto Mono", monospace';
+      outgoingText.style.marginLeft = '4px';
+      outgoingText.style.marginRight = '4px';
+
+      outgoingContainer.appendChild(outgoingText);
 
       requestsContainer.appendChild(toggle);
       requestsContainer.appendChild(outgoingContainer);
@@ -589,6 +589,13 @@ function addFriendsButton() {
         // Insert send friend request elements and listener here
         sendRequestInput = wrapper.querySelector("#send-friend-request-input");
         sendRequestButton = wrapper.querySelector("#send-friend-request-button");
+        sendRequestButton.style.transition = 'background-color 0.2s ease';
+        sendRequestButton.addEventListener('mouseenter', () => {
+          sendRequestButton.style.backgroundColor = '#e69500';
+        });
+        sendRequestButton.addEventListener('mouseleave', () => {
+          sendRequestButton.style.backgroundColor = '#ffa116';
+        });
 
         popup.appendChild(wrapper);
 
