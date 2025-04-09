@@ -154,7 +154,7 @@ function renderFriendActivity(friendsData) {
 }
 
 function renderLeaderboard(currentUserData, friendsData) {
-  const leaderboardView = document.getElementById('leaderboard-view');
+  const leaderboardContainer = document.getElementById('leaderboard-container');
   leaderboardView.innerHTML = '';
 
   const users = [];
@@ -263,7 +263,7 @@ function renderLeaderboard(currentUserData, friendsData) {
     container.appendChild(row);
   });
 
-  leaderboardView.appendChild(container);
+  leaderboardContainer.appendChild(container);
 }
 
 function renderMyFriendsGrid(friendsData) {
