@@ -14,8 +14,8 @@ async function loadFriendsData(username) {
   console.log('Loading friends data for:', username);
   try {
     const [friendsResponse, userResponse] = await Promise.all([
-      fetch(`http://127.0.0.1:5000/friends?username=${username}`),
-      fetch(`http://127.0.0.1:5000/user-data?username=${username}`)
+      fetch(`https://127.0.0.1:5000/friends?username=${username}`),
+      fetch(`https://127.0.0.1:5000/user-data?username=${username}`)
     ]);
     const friendsResult = await friendsResponse.json();
     const userResult = await userResponse.json();
@@ -395,8 +395,8 @@ function renderMyFriendsGrid(friendsData) {
 async function fetchFriendRequests(username) {
   try {
     const [incomingResponse, outgoingResponse] = await Promise.all([
-      fetch(`http://127.0.0.1:5000/friend-request/incoming?username=${username}`),
-      fetch(`http://127.0.0.1:5000/friend-request/outgoing?username=${username}`)
+      fetch(`https://127.0.0.1:5000/friend-request/incoming?username=${username}`),
+      fetch(`https://127.0.0.1:5000/friend-request/outgoing?username=${username}`)
     ]);
     const incomingData = await incomingResponse.json();
     const outgoingData = await outgoingResponse.json();
@@ -464,7 +464,7 @@ async function fetchFriendRequests(username) {
       acceptBtn.style.transition = 'background-color 0.2s ease';
 
       acceptBtn.onclick = () => {
-        fetch('http://127.0.0.1:5000/friend-request/accept', {
+        fetch('https://127.0.0.1:5000/friend-request/accept', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -492,7 +492,7 @@ async function fetchFriendRequests(username) {
       declineBtn.style.transition = 'background-color 0.2s ease';
 
       declineBtn.onclick = () => {
-        fetch('http://127.0.0.1:5000/friend-request/decline', {
+        fetch('https://127.0.0.1:5000/friend-request/decline', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -595,6 +595,25 @@ function addFriendsButton() {
         sendRequestButton.addEventListener('mouseleave', () => {
           sendRequestButton.style.backgroundColor = '#ffa116';
         });
+        sendRequestButton.addEventListener("click", () => {
+          const receiverUsername = sendRequestInput.value.trim();
+          if (!receiverUsername) return;
+        
+          fetch("https://127.0.0.1:5000/friend-request/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sender_username: username,
+              receiver_username: receiverUsername
+            })
+          })
+            .then((res) => res.json())
+            .then(() => {
+              sendRequestInput.value = "";
+              fetchFriendRequests(username);
+            })
+            .catch((error) => console.error("Failed to send friend request:", error));
+        });
 
         popup.appendChild(wrapper);
 
@@ -648,37 +667,51 @@ function addFriendsButton() {
       if (event.data?.type === "LEETCODE_USERNAME") {
         const username = event.data.username;
         console.log("Extracted username:", username);
-        const friendsContainer = popup.querySelector("#friends-container");
-        friendsContainer.style.overflowY = 'scroll';
-        friendsContainer.style.scrollbarWidth = 'none'; // For Firefox
-        friendsContainer.style.msOverflowStyle = 'none'; // For IE/Edge
-        friendsContainer.style.overflowX = 'hidden';
-        friendsContainer.style.boxSizing = 'border-box';
-        friendsContainer.style.paddingRight = '4px';
-        friendsContainer.style.marginRight = '-4px';
-        friendsContainer.style.setProperty('scrollbar-width', 'none');
-        friendsContainer.style.setProperty('::-webkit-scrollbar', 'display: none');
-        loadFriendsData(username);
-        fetchFriendRequests(username);
-        sendRequestButton.addEventListener("click", () => {
-          const receiverUsername = sendRequestInput.value.trim();
-          if (!receiverUsername) return;
-  
-          fetch("http://127.0.0.1:5000/friend-request/send", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              sender_username: username,
-              receiver_username: receiverUsername
-            })
-          })
-            .then((res) => res.json())
-            .then(() => {
-              sendRequestInput.value = "";
+        
+        fetch(`https://127.0.0.1:5000/user-is-registered?username=${username}`)
+          .then(res => res.json())
+          .then(data => {
+            if (!data.is_registered) {
+              const popupContent = popup.querySelector("#friend-activity-view");
+              popupContent.innerHTML = "";
+        
+              const registerButton = document.createElement("button");
+              registerButton.textContent = "Register";
+              registerButton.style.margin = "16px auto";
+              registerButton.style.display = "block";
+              registerButton.style.padding = "10px 20px";
+              registerButton.style.backgroundColor = "#ffa116";
+              registerButton.style.color = "white";
+              registerButton.style.border = "none";
+              registerButton.style.borderRadius = "8px";
+              registerButton.style.fontFamily = '"Roboto Mono", monospace';
+              registerButton.style.cursor = "pointer";
+        
+              registerButton.onclick = () => {
+                fetch("https://127.0.0.1:5000/register", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ username })
+                })
+                .then(res => res.json())
+                .then(data => {
+                  if (data.message?.includes("registered")) {
+                    loadFriendsData(username);
+                    fetchFriendRequests(username);
+                    console.log(`${username} is registered!`)
+                  }
+                });
+              };
+        
+              popupContent.appendChild(registerButton);
+            } else {
+              loadFriendsData(username);
               fetchFriendRequests(username);
-            })
-            .catch((error) => console.error("Failed to send friend request:", error));
-        });
+            }
+          })
+          .catch(err => console.error("Registration check failed", err));
+        
+        // Setup event listener for send request button regardless of registration state
       }
     });
 
@@ -761,4 +794,4 @@ function addFriendsButton() {
   });
 }
 
-addFriendsButton(); // Call the function manually
+addFriendsButton();
