@@ -127,6 +127,16 @@ function renderFriends(friendsData) {
     submissionTitleLink.style.display = 'inline-block';
     submissionTitleLink.style.textDecoration = 'none';
 
+    submissionTitleLink.addEventListener('mouseenter', () => {
+      submissionTitleLink.style.color = '#ffa116';
+      submissionTitleLink.style.textDecoration = 'underline';
+    });
+  
+    submissionTitleLink.addEventListener('mouseleave', () => {
+      submissionTitleLink.style.color = '#666';
+      submissionTitleLink.style.textDecoration = 'none';
+    });
+
     card.appendChild(submissionTitleLink);
 
     container.appendChild(card);
