@@ -62,7 +62,7 @@ function renderFriendActivity(friendsData) {
     card.style.boxShadow = '0 0 4px rgba(0, 0, 0, 0.2)';
     card.style.borderRadius = '8px';
     card.style.padding = '8px';
-    card.style.margin = '8px 4px'; // Added vertical spacing between cards
+    card.style.margin = '8px 4px';
     card.style.background = document.documentElement.classList.contains("dark")
       ? (index % 2 === 0 ? "#2a2a2a" : "#1f1f1f")
       : (index % 2 === 0 ? "#fff" : "#f0f0f0");
@@ -392,116 +392,117 @@ function renderMyFriendsGrid(friendsData) {
   myFriendsContainer.appendChild(myFriendsGrid);
 }
 
-function addFriendsButton() {
-  async function fetchFriendRequests(username) {
-    try {
-      const [incomingResponse, outgoingResponse] = await Promise.all([
-        fetch(`http://127.0.0.1:5000/friend-request/incoming?username=${username}`),
-        fetch(`http://127.0.0.1:5000/friend-request/outgoing?username=${username}`)
-      ]);
-      const incomingData = await incomingResponse.json();
-      const outgoingData = await outgoingResponse.json();
-      const incoming = incomingData.incoming_friend_requests || [];
-      const outgoing = outgoingData.outgoing_friend_requests || [];
-      const requestsContainer = document.querySelector("#friend-requests-container");
-      requestsContainer.innerHTML = '';
+async function fetchFriendRequests(username) {
+  try {
+    const [incomingResponse, outgoingResponse] = await Promise.all([
+      fetch(`http://127.0.0.1:5000/friend-request/incoming?username=${username}`),
+      fetch(`http://127.0.0.1:5000/friend-request/outgoing?username=${username}`)
+    ]);
+    const incomingData = await incomingResponse.json();
+    const outgoingData = await outgoingResponse.json();
+    const incoming = incomingData.incoming_friend_requests || [];
+    const outgoing = outgoingData.outgoing_friend_requests || [];
+    const requestsContainer = document.querySelector("#friend-requests-container");
+    requestsContainer.innerHTML = '';
 
-      incoming.forEach(req => {
-        const card = document.createElement('div');
-        card.className = 'request-card';
-        card.style.display = 'flex';
-        card.style.justifyContent = 'space-between';
-        card.style.alignItems = 'center';
-        card.style.padding = '12px';
-        card.style.marginBottom = '12px';
-        card.style.borderRadius = '8px';
-        card.style.backgroundColor = document.documentElement.classList.contains("dark") ? "#2a2a2a" : "#ffffff";
-        card.style.fontFamily = '"Roboto Mono", monospace';
-        card.style.boxShadow = '0 0 9px rgba(0, 0, 0, 0.2)';
+    incoming.forEach(req => {
+      const card = document.createElement('div');
+      card.className = 'request-card';
+      card.style.display = 'flex';
+      card.style.justifyContent = 'space-between';
+      card.style.alignItems = 'center';
+      card.style.padding = '12px';
+      card.style.marginBottom = '12px';
+      card.style.borderRadius = '8px';
+      card.style.backgroundColor = document.documentElement.classList.contains("dark") ? "#2a2a2a" : "#ffffff";
+      card.style.fontFamily = '"Roboto Mono", monospace';
+      card.style.boxShadow = '0 0 4px rgba(0, 0, 0, 0.2)';
 
-        const profileLink = document.createElement('a');
-        profileLink.href = `https://leetcode.com/u/${req.sender_username}`;
-        profileLink.target = '_blank';
-        profileLink.textContent = req.sender_username;
-        profileLink.style.fontSize = '14px';
-        profileLink.style.fontWeight = 'bold';
-        profileLink.style.fontFamily = '"Roboto Mono", monospace';
-        profileLink.style.color = '#ffa116';
+      const profileLink = document.createElement('a');
+      profileLink.href = `https://leetcode.com/u/${req.sender_username}`;
+      profileLink.target = '_blank';
+      profileLink.textContent = req.sender_username;
+      profileLink.style.fontSize = '14px';
+      profileLink.style.fontWeight = 'bold';
+      profileLink.style.fontFamily = '"Roboto Mono", monospace';
+      profileLink.style.color = '#ffa116';
+      profileLink.style.textDecoration = 'none';
+      profileLink.addEventListener('mouseenter', () => {
+        profileLink.style.textDecoration = 'underline';
+      });
+      profileLink.addEventListener('mouseleave', () => {
         profileLink.style.textDecoration = 'none';
-        profileLink.addEventListener('mouseenter', () => {
-          profileLink.style.textDecoration = 'underline';
-        });
-        profileLink.addEventListener('mouseleave', () => {
-          profileLink.style.textDecoration = 'none';
-        });
-
-        const actions = document.createElement('div');
-        actions.style.display = 'flex';
-        actions.style.gap = '8px';
-
-        const acceptBtn = document.createElement('button');
-        acceptBtn.textContent = 'Accept';
-        acceptBtn.style.backgroundColor = '#28a745';
-        acceptBtn.style.color = '#fff';
-        acceptBtn.style.border = 'none';
-        acceptBtn.style.borderRadius = '4px';
-        acceptBtn.style.padding = '6px 12px';
-        acceptBtn.style.fontFamily = '"Roboto Mono", monospace';
-        acceptBtn.style.cursor = 'pointer';
-
-        acceptBtn.onclick = () => {
-          fetch('http://127.0.0.1:5000/friend-request/accept', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sender_username: req.sender_username,
-              receiver_username: username
-            })
-          }).then(() => fetchFriendRequests(username));
-        };
-
-        const declineBtn = document.createElement('button');
-        declineBtn.textContent = 'Decline';
-        declineBtn.style.backgroundColor = '#dc3545';
-        declineBtn.style.color = '#fff';
-        declineBtn.style.border = 'none';
-        declineBtn.style.borderRadius = '4px';
-        declineBtn.style.padding = '6px 12px';
-        declineBtn.style.fontFamily = '"Roboto Mono", monospace';
-        declineBtn.style.cursor = 'pointer';
-
-        declineBtn.onclick = () => {
-          fetch('http://127.0.0.1:5000/friend-request/decline', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sender_username: req.sender_username,
-              receiver_username: username
-            })
-          }).then(() => fetchFriendRequests(username));
-        };
-
-        actions.appendChild(acceptBtn);
-        actions.appendChild(declineBtn);
-        card.appendChild(profileLink);
-        card.appendChild(actions);
-        requestsContainer.appendChild(card);
       });
 
-      outgoing.forEach(req => {
-        const card = document.createElement('div');
-        card.className = 'request-card';
+      const actions = document.createElement('div');
+      actions.style.display = 'flex';
+      actions.style.gap = '8px';
 
-        const name = document.createElement('div');
-        name.textContent = `To: ${req.receiver_username}`;
+      const acceptBtn = document.createElement('button');
+      acceptBtn.textContent = 'Accept';
+      acceptBtn.style.backgroundColor = '#28a745';
+      acceptBtn.style.color = '#fff';
+      acceptBtn.style.border = 'none';
+      acceptBtn.style.borderRadius = '4px';
+      acceptBtn.style.padding = '6px 12px';
+      acceptBtn.style.fontFamily = '"Roboto Mono", monospace';
+      acceptBtn.style.cursor = 'pointer';
 
-        card.appendChild(name);
-        requestsContainer.appendChild(card);
-      });
-    } catch (error) {
-      console.error("Failed to load friend requests:", error);
-    }
+      acceptBtn.onclick = () => {
+        fetch('http://127.0.0.1:5000/friend-request/accept', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sender_username: req.sender_username,
+            receiver_username: username
+          })
+        }).then(() => fetchFriendRequests(username));
+      };
+
+      const declineBtn = document.createElement('button');
+      declineBtn.textContent = 'Decline';
+      declineBtn.style.backgroundColor = '#dc3545';
+      declineBtn.style.color = '#fff';
+      declineBtn.style.border = 'none';
+      declineBtn.style.borderRadius = '4px';
+      declineBtn.style.padding = '6px 12px';
+      declineBtn.style.fontFamily = '"Roboto Mono", monospace';
+      declineBtn.style.cursor = 'pointer';
+
+      declineBtn.onclick = () => {
+        fetch('http://127.0.0.1:5000/friend-request/decline', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sender_username: req.sender_username,
+            receiver_username: username
+          })
+        }).then(() => fetchFriendRequests(username));
+      };
+
+      actions.appendChild(acceptBtn);
+      actions.appendChild(declineBtn);
+      card.appendChild(profileLink);
+      card.appendChild(actions);
+      requestsContainer.appendChild(card);
+    });
+
+    outgoing.forEach(req => {
+      const card = document.createElement('div');
+      card.className = 'request-card';
+
+      const name = document.createElement('div');
+      name.textContent = `To: ${req.receiver_username}`;
+
+      card.appendChild(name);
+      requestsContainer.appendChild(card);
+    });
+  } catch (error) {
+    console.error("Failed to load friend requests:", error);
   }
+}
+
+function addFriendsButton() {
   window.addEventListener("pageshow", async () => {
     const isDark = document.documentElement.classList.contains("dark");
     const currentUrl = window.location.href;
@@ -532,11 +533,11 @@ function addFriendsButton() {
         // Insert send friend request elements and listener here
         const sendRequestInput = wrapper.querySelector("#send-friend-request-input");
         const sendRequestButton = wrapper.querySelector("#send-friend-request-button");
-        
+
         sendRequestButton.addEventListener("click", () => {
           const receiverUsername = sendRequestInput.value.trim();
           if (!receiverUsername) return;
-        
+
           fetch("http://127.0.0.1:5000/friend-request/send", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
