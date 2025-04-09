@@ -44,6 +44,14 @@
         color: #ccc !important;
       }
     }
+
+    .loading-indicator {
+      font-family: "Roboto Mono", monospace;
+      font-size: 14px;
+      color: #999;
+      text-align: center;
+      padding: 12px 0;
+    }
   </style>
   <h2 class="premiumBtnStyle__8s3V font-typo" style="margin-bottom: 12px; font-size: 18px;">Friends :D</h2>
   <div style="display: flex; justify-content: center;">
@@ -51,7 +59,7 @@
         display: flex;
         justify-content: center;
         margin-bottom: 8px;
-        max-width: 480px;
+        max-width: 560px;
         border: 1px solid #ddd;
         border-radius: 8px;
         overflow: hidden;
@@ -76,13 +84,19 @@
     </div>
   </div>
   <div id="friend-activity-view" style="display: block;">
-    <div id="friends-container" style="max-height: 70vh; overflow-y: auto;"></div>
+    <div id="friends-container" style="max-height: 70vh; overflow-y: auto;">
+      <div class="loading-indicator">Loading...</div>
+    </div>
   </div>
   <div id="my-friends-view" style="display: none; max-height: 70vh; overflow-y: auto;">
-    <div id="my-friends-container"></div>
+    <div id="my-friends-container">
+      <div class="loading-indicator">Loading...</div>
+    </div>
   </div>
   <div id="leaderboard-view" style="display: none;">
-    <p style="color: #999;">meow meow</p>
+    <div id="leaderboard-container">
+      <div class="loading-indicator">Loading...</div>
+    </div>
   </div>
   <div id="friend-requests-view" style="display: none; max-height: 70vh; overflow-y: auto;">
     <div style="display: flex; align-items: center; margin-bottom: 12px; gap: 8px;">
@@ -93,6 +107,8 @@
         Send
       </button>
     </div>
-    <div id="friend-requests-container" style="margin: 8px 0;"></div>
+    <div id="friend-requests-container" style="margin: 8px 0;">
+      <div class="loading-indicator">Loading...</div>
+    </div>
   </div>
 </div>
