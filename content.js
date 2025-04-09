@@ -241,9 +241,9 @@ function renderMyFriendsGrid(friendsData) {
       🧠 Active days: ${totalActiveDays}<br>
       🌍 Rank: ${rank || 'N/A'}<br>
       ✅ Total AC: ${totalAC}<br>
-      🟢 Easy AC: ${easyAC}<br>
-      🟠 Med AC: ${mediumAC}<br>
-      🔴 Hard AC: ${hardAC}
+      😁 Easy AC: ${easyAC}<br>
+      😐 Med AC: ${mediumAC}<br>
+      🫠 Hard AC: ${hardAC}
     `;
 
     card.appendChild(metadata);
