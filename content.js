@@ -174,7 +174,7 @@ function renderMyFriendsGrid(friendsData) {
     img.style.height = '80px';
     img.style.borderRadius = '50%';
     img.style.marginBottom = '8px';
-    img.style.boxShadow = '0 0 6px rgba(0, 0, 0, 0.15)';
+    img.style.boxShadow = '0 0 9px rgba(0, 0, 0, 0.2)';
 
     const link = document.createElement('a');
     link.href = `https://leetcode.com/u/${username}`;
@@ -237,7 +237,7 @@ function renderMyFriendsGrid(friendsData) {
 
     metadata.innerHTML = `
       🔥 Streak: ${streak} days<br>
-      📅 Last 7 days: ${last7DaySubmissions} Solved<br>
+      📅 Last 7 days: ${last7DaySubmissions || 'None'} Solved<br>
       🧠 Active days: ${totalActiveDays}<br>
       🌍 Rank: ${rank || 'N/A'}<br>
       ✅ Total AC: ${totalAC}<br>
