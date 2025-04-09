@@ -247,10 +247,10 @@ function renderLeaderboard(currentUserData, friendsData) {
     statWrapper.style.marginLeft = 'auto';
 
     const solvedElem = document.createElement('div');
-    solvedElem.textContent = `✅ Solved: ${user.solved}`;
+    solvedElem.textContent = `Questions Solved: ${user.solved}`;
 
     const score = document.createElement('div');
-    score.textContent = `Rank: ${user.rank}`;
+    score.textContent = `Global Rank: ${user.rank}`;
 
     statWrapper.appendChild(solvedElem);
     statWrapper.appendChild(score);
@@ -446,6 +446,7 @@ function addFriendsButton() {
       if (event.source !== window) return;
       if (event.data?.type === "LEETCODE_USERNAME") {
         const username = event.data.username;
+        console.log("Extracted username:", username);
         const friendsContainer = popup.querySelector("#friends-container");
         friendsContainer.style.overflowY = 'scroll';
         friendsContainer.style.scrollbarWidth = 'none'; // For Firefox
