@@ -38,7 +38,7 @@ function renderFriendActivity(friendsData) {
     if (!friendsData || friendsData.length === 0) {
       container.innerHTML = `
         <div class="loading-indicator" style="padding: 64px 0;">
-          you currently have no friends :(<br>
+          You currently have no friends :C<br>
           <span style="font-size: 13px; color: #aaa;">Go make some friends in the friend requests tab! 👉👉👉</span>
         </div>
       `;
@@ -168,7 +168,7 @@ function renderLeaderboard(currentUserData, friendsData) {
   if (!friendsData || friendsData.length === 0) {
     leaderboardContainer.innerHTML = `
       <div class="loading-indicator" style="padding: 64px 0;">
-        you currently have no friends :(<br>
+        You currently have no friends :C<br>
         <span style="font-size: 13px; color: #aaa;">Go make some friends in the friend requests tab! 👉👉👉</span>
       </div>
     `;
@@ -297,7 +297,7 @@ function renderMyFriendsGrid(friendsData) {
   if (!friendsData || friendsData.length === 0) {
     myFriendsContainer.innerHTML = `
       <div class="loading-indicator" style="padding: 64px 0;">
-        you currently have no friends :(<br>
+        You currently have no friends :C<br>
         <span style="font-size: 13px; color: #aaa;">Go make some friends in the friend requests tab! 👉👉👉</span>
       </div>
     `;
