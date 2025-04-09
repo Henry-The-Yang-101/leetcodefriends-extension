@@ -396,40 +396,91 @@ function addFriendsButton() {
       const outgoingData = await outgoingResponse.json();
       const incoming = incomingData.incoming_friend_requests || [];
       const outgoing = outgoingData.outgoing_friend_requests || [];
-      // Removed redundant requestsContainer creation; using the container defined later.
-      const sectionTitle = (text) => {
-        const title = document.createElement('h4');
-        title.textContent = text;
-        title.style.margin = '8px 0 4px 0';
-        title.style.fontSize = '14px';
-        title.style.color = document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
-        return title;
-      };
-      const list = (requests, labelKey) => {
-        const ul = document.createElement('ul');
-        ul.style.paddingLeft = '16px';
-        ul.style.margin = '0';
-        requests.forEach(req => {
-          const li = document.createElement('li');
-          li.style.marginBottom = '4px';
-          li.textContent = req[labelKey];
-          ul.appendChild(li);
-        });
-        return ul;
-      };
       const requestsContainer = document.querySelector("#friend-requests-container");
       requestsContainer.innerHTML = '';
-      requestsContainer.appendChild(sectionTitle("Friend Requests"));
       
-      if (incoming.length > 0) {
-        requestsContainer.appendChild(sectionTitle("Incoming Requests"));
-        requestsContainer.appendChild(list(incoming, 'sender_username'));
-      }
+      incoming.forEach(req => {
+        const card = document.createElement('div');
+        card.className = 'request-card';
+        card.style.display = 'flex';
+        card.style.justifyContent = 'space-between';
+        card.style.alignItems = 'center';
+        card.style.padding = '12px';
+        card.style.marginBottom = '12px';
+        card.style.borderRadius = '8px';
+        card.style.backgroundColor = document.documentElement.classList.contains("dark") ? "#2a2a2a" : "#ffffff";
+        card.style.fontFamily = '"Roboto Mono", monospace';
+        card.style.boxShadow = '0 0 9px rgba(0, 0, 0, 0.2)';
+
+        const name = document.createElement('div');
+        name.textContent = req.sender_username || req.username;
+        name.style.fontSize = '14px';
+        name.style.fontWeight = 'bold';
+        name.style.color = document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
+
+        const actions = document.createElement('div');
+        actions.style.display = 'flex';
+        actions.style.gap = '8px';
+
+        const acceptBtn = document.createElement('button');
+        acceptBtn.textContent = 'Accept';
+        acceptBtn.style.backgroundColor = '#28a745';
+        acceptBtn.style.color = '#fff';
+        acceptBtn.style.border = 'none';
+        acceptBtn.style.borderRadius = '4px';
+        acceptBtn.style.padding = '6px 12px';
+        acceptBtn.style.fontFamily = '"Roboto Mono", monospace';
+        acceptBtn.style.cursor = 'pointer';
+
+        acceptBtn.onclick = () => {
+          fetch('http://127.0.0.1:5000/friend-request/accept', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sender_username: req.sender_username,
+              receiver_username: username
+            })
+          }).then(() => fetchFriendRequests(username));
+        };
+
+        const declineBtn = document.createElement('button');
+        declineBtn.textContent = 'Decline';
+        declineBtn.style.backgroundColor = '#dc3545';
+        declineBtn.style.color = '#fff';
+        declineBtn.style.border = 'none';
+        declineBtn.style.borderRadius = '4px';
+        declineBtn.style.padding = '6px 12px';
+        declineBtn.style.fontFamily = '"Roboto Mono", monospace';
+        declineBtn.style.cursor = 'pointer';
+
+        declineBtn.onclick = () => {
+          fetch('http://127.0.0.1:5000/friend-request/decline', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sender_username: req.sender_username,
+              receiver_username: username
+            })
+          }).then(() => fetchFriendRequests(username));
+        };
+
+        actions.appendChild(acceptBtn);
+        actions.appendChild(declineBtn);
+        card.appendChild(name);
+        card.appendChild(actions);
+        requestsContainer.appendChild(card);
+      });
       
-      if (outgoing.length > 0) {
-        requestsContainer.appendChild(sectionTitle("Outgoing Requests"));
-        requestsContainer.appendChild(list(outgoing, 'receiver_username'));
-      }
+      outgoing.forEach(req => {
+        const card = document.createElement('div');
+        card.className = 'request-card';
+      
+        const name = document.createElement('div');
+        name.textContent = `To: ${req.receiver_username}`;
+      
+        card.appendChild(name);
+        requestsContainer.appendChild(card);
+      });
     } catch (error) {
       console.error("Failed to load friend requests:", error);
     }
