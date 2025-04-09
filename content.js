@@ -200,6 +200,52 @@ function renderMyFriendsGrid(friendsData) {
 
     link.insertBefore(img, link.firstChild);
     card.appendChild(link);
+
+    const metadata = document.createElement('div');
+    metadata.style.fontSize = '12px';
+    metadata.style.color = '#333';
+    metadata.style.marginTop = '8px';
+    metadata.style.textAlign = 'center';
+    metadata.style.lineHeight = '1.5';
+    metadata.style.fontFamily = '"Roboto Mono", monospace';
+
+    // Extract values safely
+    const calendarData = friend.data?.userProfileCalendar?.userCalendar || {};
+    const stats = friend.data?.userSessionStats?.submitStats?.acSubmissionNum || [];
+    const rank = friend.data?.userPublicProfile?.profile?.ranking;
+    const streak = calendarData.streak || 0;
+    const totalActiveDays = calendarData.totalActiveDays || 0;
+
+    // Parse the submission calendar to count submissions in the last 7 days
+    let last7DaySubmissions = 0;
+    if (calendarData.submissionCalendar) {
+      const calendar = JSON.parse(calendarData.submissionCalendar);
+      const now = Math.floor(Date.now() / 1000);
+      const weekAgo = now - 7 * 24 * 60 * 60;
+      for (const [timestamp, count] of Object.entries(calendar)) {
+        if (Number(timestamp) >= weekAgo) {
+          last7DaySubmissions += Number(count);
+        }
+      }
+    }
+
+    // Build metadata string
+    const totalAC = stats.find(s => s.difficulty === 'All')?.count || 0;
+    const easyAC = stats.find(s => s.difficulty === 'Easy')?.count || 0;
+    const mediumAC = stats.find(s => s.difficulty === 'Medium')?.count || 0;
+    const hardAC = stats.find(s => s.difficulty === 'Hard')?.count || 0;
+
+    metadata.innerHTML = `
+      🔥 Streak: ${streak} days<br>
+      📅 Last 7 days: ${last7DaySubmissions} Qs<br>
+      🧠 Active days: ${totalActiveDays}<br>
+      🌍 Rank: ${rank || 'N/A'}<br>
+      ✅ Total AC: ${totalAC}<br>
+      🟢 Easy: ${easyAC} | 🟠 Med: ${mediumAC} | 🔴 Hard: ${hardAC}
+    `;
+
+    card.appendChild(metadata);
+
     myFriendsGrid.appendChild(card);
   });
 
