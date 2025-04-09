@@ -63,7 +63,9 @@ function renderFriendActivity(friendsData) {
     card.style.borderRadius = '8px';
     card.style.padding = '8px';
     card.style.margin = '8px 4px'; // Added vertical spacing between cards
-    card.style.background = index % 2 === 0 ? '#fff' : '#f0f0f0';
+    card.style.background = document.documentElement.classList.contains("dark")
+      ? (index % 2 === 0 ? "#2a2a2a" : "#1f1f1f")
+      : (index % 2 === 0 ? "#fff" : "#f0f0f0");
     card.style.fontFamily = '"Roboto Mono", monospace';
 
     // Create header div with avatar, username, and time ago
@@ -117,7 +119,7 @@ function renderFriendActivity(friendsData) {
     }
     const timeSpan = document.createElement('span');
     timeSpan.style.fontSize = '13px';
-    timeSpan.style.color = '#666';
+    timeSpan.style.color = document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
     timeSpan.textContent = timeText;
     headerDiv.appendChild(timeSpan);
 
@@ -129,7 +131,7 @@ function renderFriendActivity(friendsData) {
     submissionTitleLink.target = '_blank';
     submissionTitleLink.textContent = item.title;
     submissionTitleLink.style.fontSize = '13px';
-    submissionTitleLink.style.color = '#666';
+    submissionTitleLink.style.color = document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
     submissionTitleLink.style.textAlign = 'left';
     submissionTitleLink.style.marginTop = '4px';
     submissionTitleLink.style.display = 'inline-block';
@@ -141,7 +143,7 @@ function renderFriendActivity(friendsData) {
     });
   
     submissionTitleLink.addEventListener('mouseleave', () => {
-      submissionTitleLink.style.color = '#666';
+      submissionTitleLink.style.color = document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
       submissionTitleLink.style.textDecoration = 'none';
     });
 
@@ -205,7 +207,9 @@ function renderLeaderboard(currentUserData, friendsData) {
     row.style.gap = '12px';
     row.style.padding = '8px';
     row.style.borderRadius = '6px';
-    row.style.background = user.isCurrentUser ? '#ffe8cc' : '#f8f8f8';
+    row.style.background = document.documentElement.classList.contains("dark")
+      ? (user.isCurrentUser ? "#3a2a15" : "#2b2b2b")
+      : (user.isCurrentUser ? "#ffe8cc" : "#f8f8f8");
     row.style.boxShadow = '0 0 4px rgba(0,0,0,0.1)';
 
     const rankElem = document.createElement('div');
@@ -282,6 +286,9 @@ function renderMyFriendsGrid(friendsData) {
     card.style.flexDirection = 'column';
     card.style.alignItems = 'center';
     card.style.fontFamily = '"Roboto Mono", monospace';
+    card.style.backgroundColor = document.documentElement.classList.contains("dark") ? "#2a2a2a" : "#ffffff";
+    card.style.borderRadius = "8px";
+    card.style.padding = "12px";
     // Removed hover effect from card
 
     const img = document.createElement('img');
@@ -320,11 +327,12 @@ function renderMyFriendsGrid(friendsData) {
 
     const metadata = document.createElement('div');
     metadata.style.fontSize = '12px';
-    metadata.style.color = '#333';
+    metadata.style.color = document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
     metadata.style.marginTop = '8px';
     metadata.style.textAlign = 'center';
     metadata.style.lineHeight = '1.5';
     metadata.style.fontFamily = '"Roboto Mono", monospace';
+    metadata.style.backgroundColor = "transparent";
 
     // Extract values safely
     const calendarData = friend.data?.userProfileCalendar?.userCalendar || {};
@@ -421,8 +429,8 @@ function addFriendsButton() {
               button.style.color = "#ffa116";
               view.style.display = "block";
             } else {
-              button.style.backgroundColor = "white";
-              button.style.color = "#333";
+          button.style.backgroundColor = "white";
+          button.style.color = document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
               view.style.display = "none";
             }
           });
