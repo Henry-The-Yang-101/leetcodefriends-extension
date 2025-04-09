@@ -522,6 +522,29 @@ function addFriendsButton() {
       .then(html => {
         const wrapper = document.createElement("div");
         wrapper.innerHTML = html;
+        // Insert send friend request elements and listener here
+        const sendRequestInput = wrapper.querySelector("#send-friend-request-input");
+        const sendRequestButton = wrapper.querySelector("#send-friend-request-button");
+        
+        sendRequestButton.addEventListener("click", () => {
+          const receiverUsername = sendRequestInput.value.trim();
+          if (!receiverUsername) return;
+        
+          fetch("http://127.0.0.1:5000/friend-request/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sender_username: username,
+              receiver_username: receiverUsername
+            })
+          })
+            .then((res) => res.json())
+            .then(() => {
+              sendRequestInput.value = "";
+              fetchFriendRequests(username);
+            })
+            .catch((error) => console.error("Failed to send friend request:", error));
+        });
         popup.appendChild(wrapper);
 
         const friendActivityTab = wrapper.querySelector("#friend-activity-tab");
@@ -586,28 +609,6 @@ function addFriendsButton() {
         friendsContainer.style.setProperty('::-webkit-scrollbar', 'display: none');
         loadFriendsData(username);
         fetchFriendRequests(username);
-        const sendRequestInput = wrapper.querySelector("#send-friend-request-input");
-        const sendRequestButton = wrapper.querySelector("#send-friend-request-button");
-
-        sendRequestButton.addEventListener("click", () => {
-          const receiverUsername = sendRequestInput.value.trim();
-          if (!receiverUsername) return;
-
-          fetch("http://127.0.0.1:5000/friend-request/send", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              sender_username: username,
-              receiver_username: receiverUsername
-            })
-          })
-            .then((res) => res.json())
-            .then(() => {
-              sendRequestInput.value = "";
-              fetchFriendRequests(username);
-            })
-            .catch((error) => console.error("Failed to send friend request:", error));
-        });
       }
     });
 
