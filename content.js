@@ -398,7 +398,7 @@ function addFriendsButton() {
       const outgoing = outgoingData.outgoing_friend_requests || [];
       const requestsContainer = document.querySelector("#friend-requests-container");
       requestsContainer.innerHTML = '';
-      
+
       incoming.forEach(req => {
         const card = document.createElement('div');
         card.className = 'request-card';
@@ -480,14 +480,14 @@ function addFriendsButton() {
         card.appendChild(actions);
         requestsContainer.appendChild(card);
       });
-      
+
       outgoing.forEach(req => {
         const card = document.createElement('div');
         card.className = 'request-card';
-      
+
         const name = document.createElement('div');
         name.textContent = `To: ${req.receiver_username}`;
-      
+
         card.appendChild(name);
         requestsContainer.appendChild(card);
       });
@@ -586,6 +586,28 @@ function addFriendsButton() {
         friendsContainer.style.setProperty('::-webkit-scrollbar', 'display: none');
         loadFriendsData(username);
         fetchFriendRequests(username);
+        const sendRequestInput = wrapper.querySelector("#send-friend-request-input");
+        const sendRequestButton = wrapper.querySelector("#send-friend-request-button");
+
+        sendRequestButton.addEventListener("click", () => {
+          const receiverUsername = sendRequestInput.value.trim();
+          if (!receiverUsername) return;
+
+          fetch("http://127.0.0.1:5000/friend-request/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sender_username: username,
+              receiver_username: receiverUsername
+            })
+          })
+            .then((res) => res.json())
+            .then(() => {
+              sendRequestInput.value = "";
+              fetchFriendRequests(username);
+            })
+            .catch((error) => console.error("Failed to send friend request:", error));
+        });
       }
     });
 
