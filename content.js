@@ -47,16 +47,16 @@ function renderFriends(friendsData) {
 
   // Sort submissions by timestamp, most recent first
   submissions.sort((a, b) => b.timestamp - a.timestamp);
+  submissions = submissions.slice(0, 50); // Limit the number of cards
 
   // Create a card for each submission
-  submissions.forEach(item => {
+  submissions.forEach((item, index) => {
     const card = document.createElement('div');
-    card.style.border = '1px solid #ddd';
+    card.style.boxShadow = '0 0 4px rgba(0, 0, 0, 0.2)';
     card.style.borderRadius = '8px';
     card.style.padding = '8px';
-    card.style.margin = '8px 0'; // Added vertical spacing between cards
-    card.style.background = '#fff';
-    card.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+    card.style.margin = '8px 4px'; // Added vertical spacing between cards
+    card.style.background = index % 2 === 0 ? '#fff' : '#f0f0f0';
     card.style.fontFamily = '"Roboto Mono", monospace';
 
     // Create header div with avatar, username, and time ago
@@ -221,6 +221,14 @@ function addFriendsButton() {
         const username = event.data.username;
         const friendsContainer = popup.querySelector("#friends-container");
         friendsContainer.style.overflowY = 'scroll';
+        friendsContainer.style.scrollbarWidth = 'none'; // For Firefox
+        friendsContainer.style.msOverflowStyle = 'none'; // For IE/Edge
+        friendsContainer.style.overflowX = 'hidden';
+        friendsContainer.style.boxSizing = 'border-box';
+        friendsContainer.style.paddingRight = '4px';
+        friendsContainer.style.marginRight = '-4px';
+        friendsContainer.style.setProperty('scrollbar-width', 'none');
+        friendsContainer.style.setProperty('::-webkit-scrollbar', 'display: none');
         loadFriendsData(friendsContainer, username);
       }
     });
