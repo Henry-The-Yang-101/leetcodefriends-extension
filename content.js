@@ -17,6 +17,7 @@ async function loadFriendsData(username) {
     const result = await response.json();
     if (result.friends) {
       renderFriendActivity(result.friends);
+      renderMyFriendsGrid(result.friends);
     } else {
       console.error('No friends data found in response', result);
     }
@@ -142,6 +143,48 @@ function renderFriendActivity(friendsData) {
 
     container.appendChild(card);
   });
+}
+
+function renderMyFriendsGrid(friendsData) {
+  const myFriendsView = document.getElementById('my-friends-view');
+  myFriendsView.innerHTML = '';
+
+  const myFriendsGrid = document.createElement('div');
+  myFriendsGrid.style.display = 'grid';
+  myFriendsGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+  myFriendsGrid.style.gap = '16px';
+  myFriendsGrid.style.marginTop = '12px';
+  myFriendsGrid.style.justifyItems = 'center';
+
+  friendsData.forEach(friend => {
+    const username = friend.friend_username;
+    const avatarUrl = friend.data?.userPublicProfile?.profile?.userAvatar || '';
+
+    const card = document.createElement('div');
+    card.style.display = 'flex';
+    card.style.flexDirection = 'column';
+    card.style.alignItems = 'center';
+
+    const img = document.createElement('img');
+    img.src = avatarUrl;
+    img.alt = username;
+    img.style.width = '80px';
+    img.style.height = '80px';
+    img.style.borderRadius = '50%';
+    img.style.marginBottom = '8px';
+
+    const name = document.createElement('div');
+    name.textContent = username;
+    name.style.fontSize = '14px';
+    name.style.fontWeight = '500';
+    name.style.textAlign = 'center';
+
+    card.appendChild(img);
+    card.appendChild(name);
+    myFriendsGrid.appendChild(card);
+  });
+
+  myFriendsView.appendChild(myFriendsGrid);
 }
 
 function addFriendsButton() {
