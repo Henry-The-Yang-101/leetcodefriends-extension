@@ -475,9 +475,10 @@ function addFriendsButton() {
         popup.style.right = '3px';
         popup.style.height = 'auto';
         popup.style.maxHeight = (window.innerHeight - 57) + 'px';
-        const friendCenter = rect.left + rect.width / 2;
-        const newWidth = (window.innerWidth - friendCenter - 3) * 2;
-        popup.style.width = newWidth + 'px';
+        const minWidth = 360;
+        const maxWidth = 640;
+        const clampedWidth = Math.max(minWidth, maxWidth);
+        popup.style.width = clampedWidth + 'px';
         popup.style.opacity = "1";
         popup.style.pointerEvents = "auto";
         friendsButton.classList.add("bg-fill-3", "dark:bg-dark-fill-3");
