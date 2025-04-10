@@ -764,7 +764,7 @@ function addFriendsButton() {
           button.addEventListener("mouseleave", () => {
             if (!button.classList.contains("active-tab")) {
               const darkModeActive = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark");
-              button.style.backgroundColor = darkModeActive ? "#2a2a2a" : "#ffffff";
+              button.style.backgroundColor = darkModeActive ? "#1e1e1e" : "#ffffff";
             }
           });
         });
@@ -774,7 +774,7 @@ function addFriendsButton() {
           tabMapping.forEach(({ button, view }, index) => {
             button.classList.remove("active-tab");
             const isActive = button === activeButton;
-            button.style.backgroundColor = isActive ? "transparent" : (darkModeActive ? "#2a2a2a" : "#ffffff");
+            button.style.backgroundColor = isActive ? "transparent" : (darkModeActive ? "#1e1e1e" : "#ffffff");
             button.style.color = isActive ? "#ffa116" : (darkModeActive ? "#e0e0e0" : "#333");
             view.style.display = isActive ? "block" : "none";
             if (isActive) {
