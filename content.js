@@ -702,6 +702,8 @@ function addFriendsButton() {
 
         popup.appendChild(wrapper);
         const reloadButton = popup.querySelector("#reload-button");
+        reloadButton.style.transition = 'color 0.2s ease, background-color 0.2s ease';
+
         reloadButton.addEventListener("mouseenter", () => {
           reloadButton.style.color = "#ffa116";
         });
@@ -791,7 +793,7 @@ function addFriendsButton() {
               popupContent.innerHTML = "";
         
               const registerButton = document.createElement("button");
-              registerButton.textContent = "Register";
+              registerButton.textContent = `Register as ${username}!`;
               registerButton.style.margin = "16px auto";
               registerButton.style.display = "block";
               registerButton.style.padding = "10px 20px";
