@@ -701,6 +701,19 @@ function addFriendsButton() {
         });
 
         popup.appendChild(wrapper);
+        const reloadButton = popup.querySelector("#reload-button");
+        reloadButton.addEventListener("mouseenter", () => {
+          reloadButton.style.color = "#ffa116";
+        });
+        reloadButton.addEventListener("mouseleave", () => {
+          reloadButton.style.color = isDark ? "#e0e0e0" : "#333";
+        });
+        reloadButton.onclick = () => {
+          loadFriendsData(username);
+          fetchFriendRequests(username);
+          const navbar = popup.querySelector("#friends-navbar");
+          if (navbar) navbar.style.display = "flex";
+        };
 
         const friendActivityTab = wrapper.querySelector("#friend-activity-tab");
         const leaderboardTab = wrapper.querySelector("#leaderboard-tab");
