@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "LeetCode Friends",
   "version": "1.0",
-  "description": "Enables friending service to LeetCode, built right into the site",
+  "description": "Enables friending service to LeetCode, seamlessly built right into the site",
   "permissions": [
     "activeTab",
     "scripting"
