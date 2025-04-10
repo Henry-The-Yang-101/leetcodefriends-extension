@@ -524,7 +524,12 @@ async function fetchFriendRequests(username) {
             sender_username: req.sender_username,
             receiver_username: username
           })
-        }).then(() => fetchFriendRequests(username));
+        }).then(() => {
+          fetchFriendRequests(username);
+          loadFriendsData(username);
+          const navbar = document.querySelector("#friends-navbar");
+          if (navbar) navbar.style.display = "flex";
+        });
       };
 
       const declineBtn = document.createElement('button');
