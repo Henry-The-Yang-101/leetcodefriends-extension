@@ -720,28 +720,29 @@ function addFriendsButton() {
         ];
         updateActiveTab(friendActivityTab);
         tabMapping.forEach(({ button }) => {
-          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
           button.style.transition = 'background-color 0.2s ease, color 0.2s ease';
           button.style.borderRadius = '8px';
           button.addEventListener("mouseenter", () => {
             if (!button.classList.contains("active-tab")) {
-              button.style.backgroundColor = isDarkMode ? "#333" : "#f5f5f5";
+              const darkModeActive = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark");
+              button.style.backgroundColor = darkModeActive ? "#333" : "#f5f5f5";
             }
           });
           button.addEventListener("mouseleave", () => {
             if (!button.classList.contains("active-tab")) {
-              button.style.backgroundColor = isDarkMode ? "#2a2a2a" : "#ffffff";
+              const darkModeActive = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark");
+              button.style.backgroundColor = darkModeActive ? "#2a2a2a" : "#ffffff";
             }
           });
         });
 
         function updateActiveTab(activeButton) {
-          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const darkModeActive = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark");
           tabMapping.forEach(({ button, view }, index) => {
             button.classList.remove("active-tab");
             const isActive = button === activeButton;
-            button.style.backgroundColor = isActive ? "transparent" : (isDarkMode ? "#2a2a2a" : "#ffffff");
-            button.style.color = isActive ? "#ffa116" : (isDarkMode ? "#e0e0e0" : "#333");
+            button.style.backgroundColor = isActive ? "transparent" : (darkModeActive ? "#2a2a2a" : "#ffffff");
+            button.style.color = isActive ? "#ffa116" : (darkModeActive ? "#e0e0e0" : "#333");
             view.style.display = isActive ? "block" : "none";
             if (isActive) {
               button.classList.add("active-tab");
