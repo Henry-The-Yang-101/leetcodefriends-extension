@@ -1,4 +1,5 @@
-<div style="
+<div id="leetcode-friends-popup">
+  <div style="
     padding: 8px;
     font-family: sans-serif;
     box-sizing: border-box;
@@ -6,42 +7,41 @@
   <style>
     @media (prefers-color-scheme: dark) {
 
-      body,
-      div[style*="padding: 8px"] {
+      #leetcode-friends-popup {
         background-color: #1e1e1e !important;
         color: #e0e0e0 !important;
       }
 
-      .active-tab {
+      #leetcode-friends-popup .active-tab {
         background-color: transparent !important;
         color: #ffa116 !important;
       }
 
-      #friends-container {
+      #leetcode-friends-popup #friends-container {
         background-color: #1e1e1e !important;
       }
 
-      #friends-container>div:nth-child(odd) {
+      #leetcode-friends-popup #friends-container>div:nth-child(odd) {
         background-color: #2a2a2a !important;
       }
 
-      #friends-container>div:nth-child(even) {
+      #leetcode-friends-popup #friends-container>div:nth-child(even) {
         background-color: #1f1f1f !important;
       }
 
-      #my-friends-view{
+      #leetcode-friends-popup #my-friends-view{
         color: #ccc !important;
       }
 
-      #leaderboard-view {
+      #leetcode-friends-popup #leaderboard-view {
         color: #ccc !important;
       }
 
-      #friend-requests-view {
+      #leetcode-friends-popup #friend-requests-view {
         color: #ccc !important;
       }
 
-      #friends-navbar {
+      #leetcode-friends-popup #friends-navbar {
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         border-radius: 8px;
       }
@@ -112,4 +112,5 @@
       <div class="loading-indicator">Loading...</div>
     </div>
   </div>
+</div>
 </div>
