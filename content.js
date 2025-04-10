@@ -1,3 +1,6 @@
+// const baseURL = "https://127.0.0.1:5000"; // Change this to your server's URL
+const baseURL = "https://leetcodefriends.online";
+
 async function waitForElement(selector) {
   return new Promise((resolve) => {
     const interval = setInterval(() => {
@@ -12,10 +15,11 @@ async function waitForElement(selector) {
 
 async function loadFriendsData(username) {
   console.log('Loading friends data for:', username);
+  console.log("baseURL in use:", baseURL);
   try {
     const [friendsResponse, userResponse] = await Promise.all([
-      fetch(`https://127.0.0.1:5000/friends?username=${username}`),
-      fetch(`https://127.0.0.1:5000/user-data?username=${username}`)
+      fetch(`${baseURL}/friends?username=${username}`),
+      fetch(`${baseURL}/current-user-info?username=${username}`)
     ]);
     const friendsResult = await friendsResponse.json();
     const userResult = await userResponse.json();
@@ -443,8 +447,8 @@ function renderMyFriendsGrid(friendsData) {
 async function fetchFriendRequests(username) {
   try {
     const [incomingResponse, outgoingResponse] = await Promise.all([
-      fetch(`https://127.0.0.1:5000/friend-request/incoming?username=${username}`),
-      fetch(`https://127.0.0.1:5000/friend-request/outgoing?username=${username}`)
+      fetch(`${baseURL}/friend-request/incoming?username=${username}`),
+      fetch(`${baseURL}/friend-request/outgoing?username=${username}`)
     ]);
     const incomingData = await incomingResponse.json();
     const outgoingData = await outgoingResponse.json();
@@ -513,7 +517,7 @@ async function fetchFriendRequests(username) {
       acceptBtn.style.transition = 'background-color 0.2s ease';
 
       acceptBtn.onclick = () => {
-        fetch('https://127.0.0.1:5000/friend-request/accept', {
+        fetch(`${baseURL}/friend-request/accept`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -542,7 +546,7 @@ async function fetchFriendRequests(username) {
       declineBtn.style.transition = 'background-color 0.2s ease';
 
       declineBtn.onclick = () => {
-        fetch('https://127.0.0.1:5000/friend-request/decline', {
+        fetch(`${baseURL}/friend-request/decline`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -668,7 +672,7 @@ function addFriendsButton() {
           const receiverUsername = sendRequestInput.value.trim();
           if (!receiverUsername) return;
         
-          fetch("https://127.0.0.1:5000/friend-request/send", {
+          fetch(`${baseURL}/friend-request/send`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -758,7 +762,7 @@ function addFriendsButton() {
         username = event.data.username;
         console.log("Extracted username:", username);
         
-        fetch(`https://127.0.0.1:5000/user-is-registered?username=${username}`)
+        fetch(`${baseURL}/user-is-registered?username=${username}`)
           .then(res => res.json())
           .then(data => {
             if (!data.is_registered) {
@@ -778,7 +782,7 @@ function addFriendsButton() {
               registerButton.style.cursor = "pointer";
         
               registerButton.onclick = () => {
-                fetch("https://127.0.0.1:5000/register", {
+                fetch(`${baseURL}/register`, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ username })
