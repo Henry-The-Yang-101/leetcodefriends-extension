@@ -1,4 +1,3 @@
-// const baseURL = "https://127.0.0.1:5000"; // Change this to your server's URL
 function isLeetCodeHomeForcingLightMode() {
   return window.location.pathname === '/' && !document.documentElement.classList.contains('dark');
 }
@@ -665,7 +664,7 @@ function addFriendsButton() {
         tabHighlight.style.borderRadius = "8px";
         tabHighlight.style.transition = "left 0.3s ease";
         tabBar.insertBefore(tabHighlight, tabBar.firstChild);
-        // Insert send friend request elements and listener here
+
         sendRequestInput = wrapper.querySelector("#send-friend-request-input");
         sendRequestButton = wrapper.querySelector("#send-friend-request-button");
         sendRequestButton.style.transition = 'background-color 0.2s ease';
