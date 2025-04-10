@@ -5,46 +5,37 @@
     box-sizing: border-box;
   ">
   <style>
-    @media (prefers-color-scheme: dark) {
+    html.dark #leetcode-friends-popup {
+      background-color: #1e1e1e !important;
+      color: #e0e0e0 !important;
+    }
 
-      #leetcode-friends-popup {
-        background-color: #1e1e1e !important;
-        color: #e0e0e0 !important;
-      }
+    html.dark #leetcode-friends-popup .active-tab {
+      background-color: transparent !important;
+      color: #ffa116 !important;
+    }
 
-      #leetcode-friends-popup .active-tab {
-        background-color: transparent !important;
-        color: #ffa116 !important;
-      }
+    html.dark #leetcode-friends-popup #friends-container {
+      background-color: #1e1e1e !important;
+    }
 
-      #leetcode-friends-popup #friends-container {
-        background-color: #1e1e1e !important;
-      }
+    html.dark #leetcode-friends-popup #friends-container > div:nth-child(odd) {
+      background-color: #2a2a2a !important;
+    }
 
-      #leetcode-friends-popup #friends-container>div:nth-child(odd) {
-        background-color: #2a2a2a !important;
-      }
+    html.dark #leetcode-friends-popup #friends-container > div:nth-child(even) {
+      background-color: #1f1f1f !important;
+    }
 
-      #leetcode-friends-popup #friends-container>div:nth-child(even) {
-        background-color: #1f1f1f !important;
-      }
+    html.dark #leetcode-friends-popup #my-friends-view,
+    html.dark #leetcode-friends-popup #leaderboard-view,
+    html.dark #leetcode-friends-popup #friend-requests-view {
+      color: #ccc !important;
+    }
 
-      #leetcode-friends-popup #my-friends-view{
-        color: #ccc !important;
-      }
-
-      #leetcode-friends-popup #leaderboard-view {
-        color: #ccc !important;
-      }
-
-      #leetcode-friends-popup #friend-requests-view {
-        color: #ccc !important;
-      }
-
-      #leetcode-friends-popup #friends-navbar {
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-        border-radius: 8px;
-      }
+    html.dark #leetcode-friends-popup #friends-navbar {
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
     }
 
     .loading-indicator {
