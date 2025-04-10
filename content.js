@@ -786,10 +786,18 @@ function addFriendsButton() {
                 .then(res => res.json())
                 .then(data => {
                   if (data.message?.includes("registered")) {
-                    loadFriendsData(username);
-                    const navbar = popup.querySelector("#friends-navbar");
-                    if (navbar) navbar.style.display = "flex";
-                    fetchFriendRequests(username);
+                    fetch(chrome.runtime.getURL("popup_content.html"))
+                      .then(response => response.text())
+                      .then(html => {
+                        popup.innerHTML = "";
+                        const wrapper = document.createElement("div");
+                        wrapper.innerHTML = html;
+                        popup.appendChild(wrapper);
+                        const navbar = popup.querySelector("#friends-navbar");
+                        if (navbar) navbar.style.display = "flex";
+                        loadFriendsData(username);
+                        fetchFriendRequests(username);
+                      });
                   }
                 });
               };
