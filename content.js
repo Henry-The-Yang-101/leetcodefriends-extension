@@ -711,6 +711,18 @@ function addFriendsButton() {
           reloadButton.style.color = isDark ? "#e0e0e0" : "#333";
         });
         reloadButton.onclick = () => {
+          const views = [
+            "#friends-container",
+            "#leaderboard-container",
+            "#my-friends-container",
+            "#friend-requests-container"
+          ];
+          views.forEach(selector => {
+            const container = popup.querySelector(selector);
+            if (container) {
+              container.innerHTML = '<div class="loading-indicator">Loading...</div>';
+            }
+          });
           loadFriendsData(username);
           fetchFriendRequests(username);
           const navbar = popup.querySelector("#friends-navbar");
