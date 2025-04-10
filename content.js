@@ -1,4 +1,7 @@
 // const baseURL = "https://127.0.0.1:5000"; // Change this to your server's URL
+function isLeetCodeHomeForcingLightMode() {
+  return window.location.pathname === '/' && !document.documentElement.classList.contains('dark');
+}
 const baseURL = "https://leetcodefriends.online";
 
 async function waitForElement(selector) {
@@ -43,12 +46,12 @@ function renderFriendActivity(friendsData) {
       const fallback = document.createElement('div');
       fallback.className = 'loading-indicator';
       fallback.style.padding = '64px 0';
-      fallback.style.color = document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+      fallback.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
       fallback.style.fontSize = '16px';
       fallback.textContent = 'You currently have no friends... :C';
       const span = document.createElement('span');
       span.style.fontSize = '13px';
-      span.style.color = document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+      span.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
       span.textContent = 'Go make some friends in the friend requests tab! 👉👉👉';
       fallback.appendChild(document.createElement('br'));
       fallback.appendChild(span);
@@ -83,7 +86,7 @@ function renderFriendActivity(friendsData) {
     card.style.borderRadius = '8px';
     card.style.padding = '8px';
     card.style.margin = '8px 4px';
-    card.style.background = document.documentElement.classList.contains("dark")
+    card.style.background = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark")
       ? (index % 2 === 0 ? "#2a2a2a" : "#1f1f1f")
       : (index % 2 === 0 ? "#fff" : "#f0f0f0");
     card.style.fontFamily = '"Roboto Mono", monospace';
@@ -139,7 +142,7 @@ function renderFriendActivity(friendsData) {
     }
     const timeSpan = document.createElement('span');
     timeSpan.style.fontSize = '13px';
-    timeSpan.style.color = document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
+    timeSpan.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
     timeSpan.textContent = timeText;
     headerDiv.appendChild(timeSpan);
 
@@ -151,7 +154,7 @@ function renderFriendActivity(friendsData) {
     submissionTitleLink.target = '_blank';
     submissionTitleLink.textContent = item.title;
     submissionTitleLink.style.fontSize = '13px';
-    submissionTitleLink.style.color = document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
+    submissionTitleLink.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
     submissionTitleLink.style.textAlign = 'left';
     submissionTitleLink.style.marginTop = '4px';
     submissionTitleLink.style.display = 'inline-block';
@@ -180,12 +183,12 @@ function renderLeaderboard(currentUserData, friendsData) {
     const fallback = document.createElement('div');
     fallback.className = 'loading-indicator';
     fallback.style.padding = '64px 0';
-    fallback.style.color = document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+    fallback.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
     fallback.style.fontSize = '16px';
     fallback.textContent = 'You currently have no friends... :C';
     const span = document.createElement('span');
     span.style.fontSize = '13px';
-    span.style.color = document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+    span.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
     span.textContent = 'Go make some friends in the friend requests tab! 👉👉👉';
     fallback.appendChild(document.createElement('br'));
     fallback.appendChild(span);
@@ -316,7 +319,7 @@ function renderMyFriendsGrid(friendsData) {
     const fallback = document.createElement('div');
     fallback.className = 'loading-indicator';
     fallback.style.padding = '64px 0';
-    fallback.style.color = document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+    fallback.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
     fallback.style.fontSize = '16px';
     fallback.textContent = 'You currently have no friends... :C';
     const span = document.createElement('span');
@@ -346,7 +349,7 @@ function renderMyFriendsGrid(friendsData) {
     card.style.flexDirection = 'column';
     card.style.alignItems = 'center';
     card.style.fontFamily = '"Roboto Mono", monospace';
-    card.style.backgroundColor = document.documentElement.classList.contains("dark") ? "#2a2a2a" : "#ffffff";
+    card.style.backgroundColor = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? "#2a2a2a" : "#ffffff";
     card.style.borderRadius = "8px";
     card.style.padding = "12px";
     card.style.width = '100%';
@@ -392,7 +395,7 @@ function renderMyFriendsGrid(friendsData) {
 
     const metadata = document.createElement('div');
     metadata.style.fontSize = '12px';
-    metadata.style.color = document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
+    metadata.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
     metadata.style.marginTop = '8px';
     metadata.style.textAlign = 'center';
     metadata.style.lineHeight = '1.5';
@@ -474,7 +477,7 @@ async function fetchFriendRequests(username) {
       card.style.marginLeft = '2px';
       card.style.marginRight = '2px';
       card.style.borderRadius = '8px';
-      card.style.backgroundColor = document.documentElement.classList.contains("dark") ? "#2a2a2a" : "#ffffff";
+      card.style.backgroundColor = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? "#2a2a2a" : "#ffffff";
       card.style.fontFamily = '"Roboto Mono", monospace';
       card.style.boxShadow = '0 0 4px rgba(0, 0, 0, 0.2)';
 
@@ -617,7 +620,7 @@ async function fetchFriendRequests(username) {
 
 function addFriendsButton() {
   window.addEventListener("pageshow", async () => {
-    const isDark = document.documentElement.classList.contains("dark");
+    const isDark = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark");
     const currentUrl = window.location.href;
 
     let friendsButton = document.createElement("a");
