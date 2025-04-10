@@ -40,6 +40,13 @@ async function loadFriendsData(username) {
 
 function renderFriendActivity(friendsData) {
   const container = document.getElementById('friends-container');
+  container.style.overflow = 'auto';
+  container.style.scrollbarWidth = 'none'; // For Firefox
+  container.style.msOverflowStyle = 'none'; // For IE/Edge
+  container.style.setProperty('scrollbar-width', 'none'); // extra precaution
+  container.style.setProperty('-ms-overflow-style', 'none');
+  container.style.cssText += '::-webkit-scrollbar { display: none; }';
+
   container.innerHTML = '';
     if (!friendsData || friendsData.length === 0) {
       const fallback = document.createElement('div');
