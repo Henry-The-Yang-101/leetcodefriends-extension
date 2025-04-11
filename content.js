@@ -317,18 +317,19 @@ function renderLeaderboard(currentUserData, friendsData) {
   const inactiveText = darkMode ? '#e0e0e0' : '#333';
 
   const weeklyTab = document.createElement('button');
-  weeklyTab.textContent = 'Weekly';
+  weeklyTab.textContent = 'Leaderboard This Week';
   weeklyTab.style.flex = '1';
   weeklyTab.style.padding = '8px';
   weeklyTab.style.border = 'none';
-  weeklyTab.style.backgroundColor = '#ffa116';
-  weeklyTab.style.color = '#fff';
+  weeklyTab.style.backgroundColor = "#ffa1161f";
+  weeklyTab.style.color = '#ffa116';
   weeklyTab.style.cursor = 'pointer';
   weeklyTab.style.transition = 'background-color 0.2s ease, color 0.2s ease';
   weeklyTab.style.fontFamily = '"Roboto Mono", monospace';
+  weeklyTab.classList.add('active');
 
   const allTimeTab = document.createElement('button');
-  allTimeTab.textContent = 'All Time';
+  allTimeTab.textContent = 'All Time Leaderboard';
   allTimeTab.style.flex = '1';
   allTimeTab.style.padding = '8px';
   allTimeTab.style.border = 'none';
@@ -338,24 +339,26 @@ function renderLeaderboard(currentUserData, friendsData) {
   allTimeTab.style.transition = 'background-color 0.2s ease, color 0.2s ease';
   allTimeTab.style.fontFamily = '"Roboto Mono", monospace';
 
+  // Weekly tab hover
   weeklyTab.addEventListener('mouseenter', () => {
-    if (weeklyTab.style.backgroundColor !== 'rgb(255, 161, 22)') {
+    if (!weeklyTab.classList.contains('active')) {
       weeklyTab.style.backgroundColor = darkMode ? '#333' : '#f5f5f5';
     }
   });
   weeklyTab.addEventListener('mouseleave', () => {
-    if (weeklyTab.style.backgroundColor !== 'rgb(255, 161, 22)') {
+    if (!weeklyTab.classList.contains('active')) {
       weeklyTab.style.backgroundColor = inactiveBg;
     }
   });
 
+  // All Time tab hover
   allTimeTab.addEventListener('mouseenter', () => {
-    if (allTimeTab.style.backgroundColor !== 'rgb(255, 161, 22)') {
+    if (!allTimeTab.classList.contains('active')) {
       allTimeTab.style.backgroundColor = darkMode ? '#333' : '#f5f5f5';
     }
   });
   allTimeTab.addEventListener('mouseleave', () => {
-    if (allTimeTab.style.backgroundColor !== 'rgb(255, 161, 22)') {
+    if (!allTimeTab.classList.contains('active')) {
       allTimeTab.style.backgroundColor = inactiveBg;
     }
   });
@@ -429,13 +432,8 @@ function renderLeaderboard(currentUserData, friendsData) {
 
       if (mode === 'all') {
         const solvedElem = document.createElement('div');
-        solvedElem.textContent = `Questions Solved: ${user.solved}`;
-
-        const score = document.createElement('div');
-        score.textContent = `Global Rank: ${user.rank}`;
-
+        solvedElem.textContent = `All Time AC: ${user.solved}`;
         statWrapper.appendChild(solvedElem);
-        statWrapper.appendChild(score);
       } else if (mode === 'weekly') {
         const weeklyElem = document.createElement('div');
         weeklyElem.textContent = `AC This Week: ${user.weekly}`;
@@ -451,19 +449,29 @@ function renderLeaderboard(currentUserData, friendsData) {
 
   renderList(weeklyUsers, 'weekly');
 
+  // Weekly tab click
   weeklyTab.addEventListener('click', () => {
-    weeklyTab.style.backgroundColor = '#ffa116';
-    weeklyTab.style.color = '#fff';
+    weeklyTab.classList.add('active');
+    allTimeTab.classList.remove('active');
+
+    weeklyTab.style.backgroundColor = "#ffa1161f";
+    weeklyTab.style.color = "#ffa116";
     allTimeTab.style.backgroundColor = inactiveBg;
     allTimeTab.style.color = inactiveText;
+
     renderList(weeklyUsers, 'weekly');
   });
-  
+
+  // All Time tab click
   allTimeTab.addEventListener('click', () => {
-    allTimeTab.style.backgroundColor = '#ffa116';
-    allTimeTab.style.color = '#fff';
+    allTimeTab.classList.add('active');
+    weeklyTab.classList.remove('active');
+
+    allTimeTab.style.backgroundColor = "#ffa1161f";
+    allTimeTab.style.color = "#ffa116";
     weeklyTab.style.backgroundColor = inactiveBg;
     weeklyTab.style.color = inactiveText;
+
     renderList(allTimeUsers, 'all');
   });
 }
@@ -793,11 +801,7 @@ function addFriendsButton() {
 
     let friendsButton = document.createElement("a");
     friendsButton.className = "group relative flex h-8 items-center justify-center rounded p-1 hover:bg-fill-3 dark:hover:bg-dark-fill-3 cursor-pointer";
-    friendsButton.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22" class="text-text-secondary dark:text-text-secondary hover:text-text-primary dark:hover:text-text-primary">
-        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5s-3 1.34-3 3 1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 2.01 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-      </svg>
-    `;
+    friendsButton.innerHTML = '<img src="' + chrome.runtime.getURL("friends-icon.svg") + '" width="22" height="22" />';
     friendsButton.title = "Friends";
 
     const popup = document.createElement("div");
