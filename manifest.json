@@ -18,7 +18,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["username_obtainer.js", "popup_content.html"],
+      "resources": ["username_obtainer.js", "popup_content.html", "friends-icon.svg"],
       "matches": ["https://leetcode.com/*"]
     }
   ]
