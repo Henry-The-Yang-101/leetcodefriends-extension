@@ -974,11 +974,41 @@ function addFriendsButton() {
     obtainer_script.onload = () => obtainer_script.remove();
     (document.head || document.documentElement).appendChild(obtainer_script);
 
-    window.addEventListener("message", (event) => {
+    window.addEventListener("message", async (event) => {
       if (event.source !== window) return;
       if (event.data?.type === "LEETCODE_USERNAME") {
         username = event.data.username;
         console.log("Extracted username:", username);
+
+        const selectorMap = [
+          {
+            pattern: "https://leetcode.com/problems/",
+            selector: "nav.z-nav-1 .relative.ml-4.flex.items-center.gap-2",
+            insertIndex: 3
+          },
+          {
+            pattern: "https://leetcode.com",
+            selector: "nav#leetcode-navbar .relative.flex.items-center.space-x-2",
+            insertIndex: 2
+          }
+        ];
+
+        let container;
+        let insertIndex = 0;
+
+        for (const { pattern, selector, insertIndex: index } of selectorMap) {
+          if (currentUrl.startsWith(pattern)) {
+            container = await waitForElement(selector);
+            insertIndex = index;
+            break;
+          }
+        }
+        if (container) {
+          container.insertBefore(friendsButton, container.children[insertIndex]);
+        } else {
+          console.warn("Navbar container not found!");
+          return;
+        }
 
         fetch(`${baseURL}/user-is-registered?username=${username}`)
           .then(async (res) => {
@@ -1088,37 +1118,6 @@ function addFriendsButton() {
         document.addEventListener("keydown", closeOnEsc);
       }
     });
-
-    const selectorMap = [
-      {
-        pattern: "https://leetcode.com/problems/",
-        selector: "nav.z-nav-1 .relative.ml-4.flex.items-center.gap-2",
-        insertIndex: 3
-      },
-      {
-        pattern: "https://leetcode.com",
-        selector: "nav#leetcode-navbar .relative.flex.items-center.space-x-2",
-        insertIndex: 2
-      }
-    ];
-
-    let container;
-    let insertIndex = 0;
-
-    for (const { pattern, selector, insertIndex: index } of selectorMap) {
-      if (currentUrl.startsWith(pattern)) {
-        container = await waitForElement(selector);
-        insertIndex = index;
-        break;
-      }
-    }
-
-    if (!container) {
-      console.warn("Navbar container not found!");
-      return;
-    }
-
-    container.insertBefore(friendsButton, container.children[insertIndex]);
   });
 }
 
