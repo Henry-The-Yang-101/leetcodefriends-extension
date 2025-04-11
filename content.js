@@ -221,16 +221,17 @@ function renderFriendActivity(friendsData) {
 function renderLeaderboard(currentUserData, friendsData) {
   const leaderboardContainer = document.querySelector('#leaderboard-container');
   leaderboardContainer.innerHTML = '';
+
   if (!friendsData || friendsData.length === 0) {
     const fallback = document.createElement('div');
     fallback.className = 'loading-indicator';
     fallback.style.padding = '64px 0';
-    fallback.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+    fallback.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains('dark') ? '#e0e0e0' : '#000';
     fallback.style.fontSize = '16px';
     fallback.textContent = 'You currently have no friends... :C';
     const span = document.createElement('span');
     span.style.fontSize = '13px';
-    span.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+    span.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains('dark') ? '#e0e0e0' : '#000';
     span.textContent = 'Go make some friends in the friend requests tab! 👉👉👉';
     fallback.appendChild(document.createElement('br'));
     fallback.appendChild(span);
@@ -238,120 +239,233 @@ function renderLeaderboard(currentUserData, friendsData) {
     return;
   }
 
+  // Helper function: compute weekly accepted submissions from a user's calendar data.
+  function computeWeeklyAC(data) {
+    let ACSubmissionsThisWeek = 0;
+    const calendarData = data && data.userProfileCalendar ? data.userProfileCalendar.userCalendar || {} : {};
+    if (calendarData.submissionCalendar) {
+      try {
+        const calendar = JSON.parse(calendarData.submissionCalendar);
+        const now = new Date();
+        const dayOfWeek = now.getUTCDay(); // 0 for Sunday, 6 for Saturday
+        const lastSundayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - dayOfWeek, 0, 0, 0));
+        const sundayTimestamp = Math.floor(lastSundayUTC.getTime() / 1000);
+        for (const [timestamp, count] of Object.entries(calendar)) {
+          if (Number(timestamp) >= sundayTimestamp) {
+            ACSubmissionsThisWeek += Number(count);
+          }
+        }
+      } catch (e) {
+        // If parsing fails, count as 0 submissions this week.
+      }
+    }
+    return ACSubmissionsThisWeek;
+  }
+
+  // Aggregate user data for both the current user and all friends.
   const users = [];
 
-  // Add the current user
+  // Add current user.
   const currentUsername = currentUserData.userPublicProfile?.profile?.realName || 'You';
   const currentRank = currentUserData.userPublicProfile?.profile?.ranking || Number.MAX_SAFE_INTEGER;
   const currentAvatar = currentUserData.userPublicProfile?.profile?.userAvatar || '';
   const currentTotalSolved = currentUserData.userSessionStats?.submitStats?.acSubmissionNum?.find(s => s.difficulty === 'All')?.count || 0;
+  const currentWeekly = computeWeeklyAC(currentUserData);
   users.push({
     username: currentUsername,
     avatar: currentAvatar,
     rank: currentRank,
     isCurrentUser: true,
     profileUrl: `https://leetcode.com/u/${currentUsername}`,
-    solved: currentTotalSolved
+    solved: currentTotalSolved,
+    weekly: currentWeekly
   });
 
-  // Add friends
+  // Add each friend.
   friendsData.forEach(friend => {
     const username = friend.friend_username;
     const rank = friend.data?.userPublicProfile?.profile?.ranking || Number.MAX_SAFE_INTEGER;
     const avatar = friend.data?.userPublicProfile?.profile?.userAvatar || '';
     const solved = friend.data?.userSessionStats?.submitStats?.acSubmissionNum?.find(s => s.difficulty === 'All')?.count || 0;
+    const weekly = computeWeeklyAC(friend.data);
     users.push({
       username,
       avatar,
       rank,
       isCurrentUser: false,
       profileUrl: `https://leetcode.com/u/${username}`,
-      solved
+      solved,
+      weekly
     });
   });
 
-  // Sort users by rank (ascending)
-  users.sort((a, b) => a.rank - b.rank);
+  // Create two sorted arrays for the two modes: all time and weekly.
+  const weeklyUsers = [...users].sort((a, b) => b.weekly - a.weekly);
+  const allTimeUsers = [...users].sort((a, b) => a.rank - b.rank);
 
-  // Create leaderboard container
-  const container = document.createElement('div');
-  container.style.display = 'flex';
-  container.style.flexDirection = 'column';
-  container.style.gap = '12px';
-  container.style.marginTop = '12px';
-  container.style.fontFamily = '"Roboto Mono", monospace';
+  // Create inner tab bar styled like the main navbar
+  const tabBar = document.createElement('div');
+  tabBar.style.display = 'flex';
+  tabBar.style.borderRadius = '8px';
+  tabBar.style.overflow = 'hidden';
+  tabBar.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.2)';
+  tabBar.style.marginBottom = '12px';
+  tabBar.style.fontFamily = '"Roboto Mono", monospace';
 
-  users.forEach((user, index) => {
-    const row = document.createElement('div');
-    row.style.display = 'flex';
-    row.style.alignItems = 'center';
-    row.style.gap = '12px';
-    row.style.padding = '8px';
-    row.style.borderRadius = '6px';
-    row.style.background = document.documentElement.classList.contains("dark")
-      ? (user.isCurrentUser ? "#3a2a15" : "#2b2b2b")
-      : (user.isCurrentUser ? "#ffe8cc" : "#f8f8f8");
-    row.style.boxShadow = '0 0 4px rgba(0,0,0,0.1)';
+  const darkMode = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains('dark');
+  const inactiveBg = darkMode ? '#1e1e1e' : '#ffffff';
+  const inactiveText = darkMode ? '#e0e0e0' : '#333';
 
-    const rankElem = document.createElement('div');
-    rankElem.textContent = `#${index + 1}`;
-    rankElem.style.width = '30px';
-    rankElem.style.textAlign = 'center';
+  const weeklyTab = document.createElement('button');
+  weeklyTab.textContent = 'Weekly';
+  weeklyTab.style.flex = '1';
+  weeklyTab.style.padding = '8px';
+  weeklyTab.style.border = 'none';
+  weeklyTab.style.backgroundColor = '#ffa116';
+  weeklyTab.style.color = '#fff';
+  weeklyTab.style.cursor = 'pointer';
+  weeklyTab.style.transition = 'background-color 0.2s ease, color 0.2s ease';
+  weeklyTab.style.fontFamily = '"Roboto Mono", monospace';
 
-    const avatarElem = document.createElement('img');
-    avatarElem.src = user.avatar;
-    avatarElem.alt = user.username;
-    avatarElem.style.width = '30px';
-    avatarElem.style.height = '30px';
-    avatarElem.style.borderRadius = '50%';
+  const allTimeTab = document.createElement('button');
+  allTimeTab.textContent = 'All Time';
+  allTimeTab.style.flex = '1';
+  allTimeTab.style.padding = '8px';
+  allTimeTab.style.border = 'none';
+  allTimeTab.style.backgroundColor = inactiveBg;
+  allTimeTab.style.color = inactiveText;
+  allTimeTab.style.cursor = 'pointer';
+  allTimeTab.style.transition = 'background-color 0.2s ease, color 0.2s ease';
+  allTimeTab.style.fontFamily = '"Roboto Mono", monospace';
 
-    const name = document.createElement('div');
-    name.textContent = user.username;
-    name.style.fontWeight = user.isCurrentUser ? 'bold' : 'normal';
-    name.style.flexGrow = '1';
-
-
-    const profileLink = document.createElement('a');
-    profileLink.href = user.profileUrl;
-    profileLink.target = '_blank';
-    profileLink.style.display = 'flex';
-    profileLink.style.alignItems = 'center';
-    profileLink.style.textDecoration = 'none';
-    profileLink.style.color = '#ffa116';
-    profileLink.style.gap = '8px';
-    profileLink.appendChild(avatarElem);
-    profileLink.appendChild(name);
-
-    row.appendChild(rankElem);
-    row.appendChild(profileLink);
-    const statWrapper = document.createElement('div');
-    statWrapper.style.display = 'flex';
-    statWrapper.style.flexDirection = 'column';
-    statWrapper.style.alignItems = 'flex-end';
-    statWrapper.style.textAlign = 'right';
-    statWrapper.style.marginLeft = 'auto';
-
-    const solvedElem = document.createElement('div');
-    solvedElem.textContent = `Questions Solved: ${user.solved}`;
-
-    const score = document.createElement('div');
-    score.textContent = `Global Rank: ${user.rank}`;
-
-    statWrapper.appendChild(solvedElem);
-    statWrapper.appendChild(score);
-    row.appendChild(statWrapper);
-
-    container.appendChild(row);
+  weeklyTab.addEventListener('mouseenter', () => {
+    if (weeklyTab.style.backgroundColor !== 'rgb(255, 161, 22)') {
+      weeklyTab.style.backgroundColor = darkMode ? '#333' : '#f5f5f5';
+    }
+  });
+  weeklyTab.addEventListener('mouseleave', () => {
+    if (weeklyTab.style.backgroundColor !== 'rgb(255, 161, 22)') {
+      weeklyTab.style.backgroundColor = inactiveBg;
+    }
   });
 
-  if (users.length === 0) {
-    const emptyMessage = document.createElement('div');
-    emptyMessage.className = 'loading-indicator';
-    emptyMessage.textContent = 'No leaderboard data available.';
-    leaderboardContainer.appendChild(emptyMessage);
-    return;
+  allTimeTab.addEventListener('mouseenter', () => {
+    if (allTimeTab.style.backgroundColor !== 'rgb(255, 161, 22)') {
+      allTimeTab.style.backgroundColor = darkMode ? '#333' : '#f5f5f5';
+    }
+  });
+  allTimeTab.addEventListener('mouseleave', () => {
+    if (allTimeTab.style.backgroundColor !== 'rgb(255, 161, 22)') {
+      allTimeTab.style.backgroundColor = inactiveBg;
+    }
+  });
+
+  tabBar.appendChild(weeklyTab);
+  tabBar.appendChild(allTimeTab);
+  leaderboardContainer.appendChild(tabBar);
+
+  // Container for the leaderboard rows.
+  const listContainer = document.createElement('div');
+  leaderboardContainer.appendChild(listContainer);
+
+  // Function to render a leaderboard list based on passed data and mode.
+  function renderList(usersList, mode) {
+    listContainer.innerHTML = '';
+    const container = document.createElement('div');
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '12px';
+    container.style.fontFamily = '\"Roboto Mono\", monospace';
+
+    usersList.forEach((user, index) => {
+      const row = document.createElement('div');
+      row.style.display = 'flex';
+      row.style.alignItems = 'center';
+      row.style.gap = '12px';
+      row.style.padding = '8px';
+      row.style.borderRadius = '6px';
+      row.style.boxShadow = '0 0 4px rgba(0,0,0,0.1)';
+      row.style.background = document.documentElement.classList.contains('dark')
+        ? (user.isCurrentUser ? '#3a2a15' : '#2b2b2b')
+        : (user.isCurrentUser ? '#ffe8cc' : '#f8f8f8');
+
+      const rankElem = document.createElement('div');
+      rankElem.textContent = `#${index + 1}`;
+      rankElem.style.width = '30px';
+      rankElem.style.textAlign = 'center';
+
+      const avatarElem = document.createElement('img');
+      avatarElem.src = user.avatar;
+      avatarElem.alt = user.username;
+      avatarElem.style.width = '30px';
+      avatarElem.style.height = '30px';
+      avatarElem.style.borderRadius = '50%';
+
+      const name = document.createElement('div');
+      name.textContent = user.username;
+      name.style.fontWeight = user.isCurrentUser ? 'bold' : 'normal';
+      name.style.flexGrow = '1';
+
+      const profileLink = document.createElement('a');
+      profileLink.href = user.profileUrl;
+      profileLink.target = '_blank';
+      profileLink.style.display = 'flex';
+      profileLink.style.alignItems = 'center';
+      profileLink.style.textDecoration = 'none';
+      profileLink.style.color = '#ffa116';
+      profileLink.style.gap = '8px';
+      profileLink.appendChild(avatarElem);
+      profileLink.appendChild(name);
+
+      row.appendChild(rankElem);
+      row.appendChild(profileLink);
+
+      const statWrapper = document.createElement('div');
+      statWrapper.style.display = 'flex';
+      statWrapper.style.flexDirection = 'column';
+      statWrapper.style.alignItems = 'flex-end';
+      statWrapper.style.textAlign = 'right';
+      statWrapper.style.marginLeft = 'auto';
+
+      if (mode === 'all') {
+        const solvedElem = document.createElement('div');
+        solvedElem.textContent = `Questions Solved: ${user.solved}`;
+
+        const score = document.createElement('div');
+        score.textContent = `Global Rank: ${user.rank}`;
+
+        statWrapper.appendChild(solvedElem);
+        statWrapper.appendChild(score);
+      } else if (mode === 'weekly') {
+        const weeklyElem = document.createElement('div');
+        weeklyElem.textContent = `AC This Week: ${user.weekly}`;
+        statWrapper.appendChild(weeklyElem);
+      }
+
+      row.appendChild(statWrapper);
+      container.appendChild(row);
+    });
+
+    listContainer.appendChild(container);
   }
-  leaderboardContainer.appendChild(container);
+
+  renderList(weeklyUsers, 'weekly');
+
+  weeklyTab.addEventListener('click', () => {
+    weeklyTab.style.backgroundColor = '#ffa116';
+    weeklyTab.style.color = '#fff';
+    allTimeTab.style.backgroundColor = inactiveBg;
+    allTimeTab.style.color = inactiveText;
+    renderList(weeklyUsers, 'weekly');
+  });
+  
+  allTimeTab.addEventListener('click', () => {
+    allTimeTab.style.backgroundColor = '#ffa116';
+    allTimeTab.style.color = '#fff';
+    weeklyTab.style.backgroundColor = inactiveBg;
+    weeklyTab.style.color = inactiveText;
+    renderList(allTimeUsers, 'all');
+  });
 }
 
 function renderMyFriendsGrid(friendsData) {
