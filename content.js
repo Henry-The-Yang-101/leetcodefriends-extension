@@ -1,7 +1,43 @@
+const baseURL = "https://leetcodefriends.online";
+
 function isLeetCodeHomeForcingLightMode() {
   return window.location.pathname === '/' && !document.documentElement.classList.contains('dark');
 }
-const baseURL = "https://leetcodefriends.online";
+
+function showToastMessage(message, type = "") {
+  const popup = document.querySelector("#friends-navbar")?.parentElement;
+  if (!popup) return;
+
+  const toast = document.createElement("div");
+  toast.textContent = message;
+  toast.style.position = "absolute";
+  toast.style.top = "8px";
+  toast.style.left = "50%";
+  toast.style.transform = "translateX(-50%) translateY(-20px)";
+  toast.style.backgroundColor = type === "success" ? "#28a745" : type === "error" ? "#dc3545" : "#333";
+  toast.style.color = "#fff";
+  toast.style.padding = "8px 16px";
+  toast.style.borderRadius = "6px";
+  toast.style.fontFamily = '"Roboto Mono", monospace';
+  toast.style.fontSize = "12px";
+  toast.style.zIndex = "99999";
+  toast.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+  toast.style.opacity = "0";
+
+  popup.insertBefore(toast, popup.firstChild);
+
+  requestAnimationFrame(() => {
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+  });
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateX(-50%) translateY(-20px)";
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
 
 async function waitForElement(selector) {
   return new Promise((resolve) => {
@@ -48,22 +84,22 @@ function renderFriendActivity(friendsData) {
   container.style.cssText += '::-webkit-scrollbar { display: none; }';
 
   container.innerHTML = '';
-    if (!friendsData || friendsData.length === 0) {
-      const fallback = document.createElement('div');
-      fallback.className = 'loading-indicator';
-      fallback.style.padding = '64px 0';
-      fallback.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
-      fallback.style.fontSize = '16px';
-      fallback.textContent = 'You currently have no friends... :C';
-      const span = document.createElement('span');
-      span.style.fontSize = '13px';
-      span.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
-      span.textContent = 'Go make some friends in the friend requests tab! 👉👉👉';
-      fallback.appendChild(document.createElement('br'));
-      fallback.appendChild(span);
-      container.appendChild(fallback);
-      return;
-    }
+  if (!friendsData || friendsData.length === 0) {
+    const fallback = document.createElement('div');
+    fallback.className = 'loading-indicator';
+    fallback.style.padding = '64px 0';
+    fallback.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+    fallback.style.fontSize = '16px';
+    fallback.textContent = 'You currently have no friends... :C';
+    const span = document.createElement('span');
+    span.style.fontSize = '13px';
+    span.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+    span.textContent = 'Go make some friends in the friend requests tab! 👉👉👉';
+    fallback.appendChild(document.createElement('br'));
+    fallback.appendChild(span);
+    container.appendChild(fallback);
+    return;
+  }
 
   // Build a flat list of submissions from all friends
   let submissions = [];
@@ -536,6 +572,7 @@ async function fetchFriendRequests(username) {
         }).then(() => {
           fetchFriendRequests(username);
           loadFriendsData(username);
+          showToastMessage("Friend request accepted!", "success");
           const navbar = document.querySelector("#friends-navbar");
           if (navbar) navbar.style.display = "flex";
         });
@@ -567,7 +604,10 @@ async function fetchFriendRequests(username) {
             sender_username: req.sender_username,
             receiver_username: username
           })
-        }).then(() => fetchFriendRequests(username));
+        }).then(() => {
+          fetchFriendRequests(username);
+          showToastMessage("Friend request declined.", "error");
+        });
       };
 
       actions.appendChild(acceptBtn);
@@ -649,7 +689,7 @@ function addFriendsButton() {
     let sendRequestInput;
     let sendRequestButton;
     let username;
- 
+
     fetch(chrome.runtime.getURL("popup_content.html"))
       .then(response => response.text())
       .then(html => {
@@ -685,7 +725,7 @@ function addFriendsButton() {
         function sendRequest() {
           const receiverUsername = sendRequestInput.value.trim();
           if (!receiverUsername) return;
-        
+
           fetch(`${baseURL}/friend-request/send`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -694,14 +734,19 @@ function addFriendsButton() {
               receiver_username: receiverUsername
             })
           })
-            .then((res) => res.json())
+            .then(async (res) => {
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error || "Unknown error occurred");
+              return data;
+            })
             .then(() => {
               sendRequestInput.value = "";
               fetchFriendRequests(username);
+              showToastMessage(`Friend request sent!`, "success");
             })
-            .catch((error) => console.error("Failed to send friend request:", error));
+            .catch((error) => showToastMessage(error, "error"));
         }
-        
+
         sendRequestButton.addEventListener("click", sendRequest);
         sendRequestInput.addEventListener("keypress", (event) => {
           if (event.key === "Enter") sendRequest();
@@ -718,6 +763,7 @@ function addFriendsButton() {
           reloadButton.style.color = isDark ? "#e0e0e0" : "#333";
         });
         reloadButton.onclick = () => {
+          showToastMessage("Reloading data!");
           const views = [
             "#friends-container",
             "#leaderboard-container",
@@ -803,14 +849,18 @@ function addFriendsButton() {
       if (event.data?.type === "LEETCODE_USERNAME") {
         username = event.data.username;
         console.log("Extracted username:", username);
-        
+
         fetch(`${baseURL}/user-is-registered?username=${username}`)
-          .then(res => res.json())
+          .then(async (res) => {
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Unknown error occurred");
+            return data;
+          })
           .then(data => {
             if (!data.is_registered) {
               const popupContent = popup.querySelector("#friend-activity-view");
               popupContent.innerHTML = "";
-        
+
               const registerButton = document.createElement("button");
               registerButton.textContent = `Register as ${username}!`;
               registerButton.style.margin = "16px auto";
@@ -822,43 +872,43 @@ function addFriendsButton() {
               registerButton.style.borderRadius = "8px";
               registerButton.style.fontFamily = '"Roboto Mono", monospace';
               registerButton.style.cursor = "pointer";
-        
+
               registerButton.onclick = () => {
                 fetch(`${baseURL}/register`, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ username })
                 })
-                .then(res => res.json())
-                .then(data => {
-                  if (data.message?.includes("registered")) {
-                    fetch(chrome.runtime.getURL("popup_content.html"))
-                      .then(response => response.text())
-                      .then(html => {
-                        popup.innerHTML = "";
-                        const wrapper = document.createElement("div");
-                        wrapper.innerHTML = html;
-                        popup.appendChild(wrapper);
-                        const navbar = popup.querySelector("#friends-navbar");
-                        if (navbar) navbar.style.display = "flex";
-                        loadFriendsData(username);
-                        fetchFriendRequests(username);
-                      });
-                  }
-                });
+                  .then(res => res.json())
+                  .then(data => {
+                    if (data.message?.includes("registered")) {
+                      fetch(chrome.runtime.getURL("popup_content.html"))
+                        .then(response => response.text())
+                        .then(html => {
+                          popup.innerHTML = "";
+                          const wrapper = document.createElement("div");
+                          wrapper.innerHTML = html;
+                          popup.appendChild(wrapper);
+                          const navbar = popup.querySelector("#friends-navbar");
+                          if (navbar) navbar.style.display = "flex";
+                          loadFriendsData(username);
+                          fetchFriendRequests(username);
+                        });
+                    }
+                  });
               };
-        
+
               popupContent.appendChild(registerButton);
-              } else {
-                console.log(`${username} is registered!`)
-                loadFriendsData(username);
-                const navbar = popup.querySelector("#friends-navbar");
-                if (navbar) navbar.style.display = "flex";
-                fetchFriendRequests(username);
-              }
+            } else {
+              console.log(`${username} is registered!`)
+              loadFriendsData(username);
+              const navbar = popup.querySelector("#friends-navbar");
+              if (navbar) navbar.style.display = "flex";
+              fetchFriendRequests(username);
+            }
           })
-          .catch(err => console.error("Registration check failed", err));
-        
+          .catch(err => showToastMessage(err, "error"));
+
         // Setup event listener for send request button regardless of registration state
       }
     });
