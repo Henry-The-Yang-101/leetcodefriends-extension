@@ -452,14 +452,22 @@ function renderMyFriendsGrid(friendsData) {
     const totalActiveDays = calendarData.totalActiveDays || 0;
 
     // Parse the submission calendar to count submissions in the last 7 days
-    let last7DaySubmissions = 0;
+    let ACSubmissionsThisWeek = 0;
     if (calendarData.submissionCalendar) {
       const calendar = JSON.parse(calendarData.submissionCalendar);
-      const now = Math.floor(Date.now() / 1000);
-      const weekAgo = now - 7 * 24 * 60 * 60;
+      const now = new Date();
+      const dayOfWeek = now.getUTCDay(); // 0 = Sunday, 6 = Saturday
+      const daysSinceSunday = dayOfWeek; // days to subtract to get to last Sunday
+      const lastSundayUTC = new Date(Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate() - daysSinceSunday,
+        0, 0, 0
+      ));
+      const sundayTimestamp = Math.floor(lastSundayUTC.getTime() / 1000);
       for (const [timestamp, count] of Object.entries(calendar)) {
-        if (Number(timestamp) >= weekAgo) {
-          last7DaySubmissions += Number(count);
+        if (Number(timestamp) >= sundayTimestamp) {
+          ACSubmissionsThisWeek += Number(count);
         }
       }
     }
@@ -472,7 +480,7 @@ function renderMyFriendsGrid(friendsData) {
 
     metadata.innerHTML = `
       🔥 Streak: ${streak} days<br>
-      📅 Last 7 days: ${last7DaySubmissions} Solved<br>
+      📅 This Week: ${ACSubmissionsThisWeek} AC<br>
       🧠 Active days: ${totalActiveDays}<br>
       🌍 Rank: ${rank || 'N/A'}<br>
       ✅ Total AC: ${totalAC}<br>
