@@ -52,8 +52,6 @@ async function waitForElement(selector) {
 }
 
 async function loadFriendsData(username) {
-  console.log('Loading friends data for:', username);
-  console.log("baseURL in use:", baseURL);
   try {
     const [friendsResponse, userResponse] = await Promise.all([
       fetch(`${baseURL}/friends?username=${username}`),
@@ -978,7 +976,6 @@ function addFriendsButton() {
       if (event.source !== window) return;
       if (event.data?.type === "LEETCODE_USERNAME") {
         username = event.data.username;
-        console.log("Extracted username:", username);
 
         const selectorMap = [
           {
@@ -1060,7 +1057,7 @@ function addFriendsButton() {
 
               popupContent.appendChild(registerButton);
             } else {
-              console.log(`${username} is registered!`)
+              // registered
               loadFriendsData(username);
               const navbar = popup.querySelector("#friends-navbar");
               if (navbar) navbar.style.display = "flex";
