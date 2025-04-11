@@ -9,7 +9,8 @@ With this extension, the often tedious and hair-pulling experience of the LeetCo
 - 🥶 Seamless UI built right into [leetcode.com](https://leetcode.com) itself
 - 📈 Viewing of your friends' latest submissions
 - 🏆 Leaderboard based on global ranks and problems solved
-- 📅 See activity streaks and problem AC stats
+- 🔥 See activity streaks and problem AC stats
+- 👹 Even more features coming soon!
 
 ## 🛠️ How to Use
 
