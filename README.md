@@ -10,6 +10,7 @@ With this extension, the often tedious and hair-pulling experience of the LeetCo
 - 📈 Viewing of your friends' latest submissions
 - 🏆 Weekly and all time leaderboard based on global ranks and problems solved
 - 🔥 See activity streaks and problem AC stats
+- 🌚 Dark mode compatible
 - 👹 Even more features coming soon!
 
 ## 🛠️ How to Use
