@@ -1,13 +1,27 @@
 const BASE_URL = "https://leetcodefriends.online";
 
+
+/**
+ * Checks if the LeetCode homepage is forcing light mode.
+ * @returns {boolean}
+ */
 function isLeetCodeHomeForcingLightMode() {
   return window.location.pathname === '/' && !document.documentElement.classList.contains('dark');
 }
 
+/**
+ * Determines if dark mode is currently active on the page.
+ * @returns {boolean}
+ */
 function isDarkMode() {
   return !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark");
 }
 
+/**
+ * Displays a temporary toast message at the top of the popup.
+ * @param {string} message - The message to display.
+ * @param {string} [type] - Optional type of the message: "success", "error", or "".
+ */
 function showToastMessage(message, type = "") {
   const popup = document.querySelector("#friends-navbar")?.parentElement;
   if (!popup) return;
@@ -42,7 +56,11 @@ function showToastMessage(message, type = "") {
   }, 3000);
 }
 
-
+/**
+ * Waits for a DOM element matching the selector to appear.
+ * @param {string} selector - CSS selector of the target element.
+ * @returns {Promise<Element>} - Resolves with the found element.
+ */
 async function waitForElement(selector) {
   return new Promise((resolve) => {
     const interval = setInterval(() => {
@@ -55,6 +73,10 @@ async function waitForElement(selector) {
   });
 }
 
+/**
+ * Fetches current user and friends data, and triggers rendering of views.
+ * @param {string} username - The current user's LeetCode username.
+ */
 async function loadFriendsData(username) {
   try {
     const [friendsResponse, userResponse] = await Promise.all([
@@ -76,6 +98,10 @@ async function loadFriendsData(username) {
   }
 }
 
+/**
+ * Renders friend activity cards from submission data.
+ * @param {Array<Object>} friendsData - Array of friend objects with submission history.
+ */
 function renderFriendActivity(friendsData) {
   const container = document.getElementById('friends-container');
   container.style.overflow = 'auto';
@@ -220,6 +246,11 @@ function renderFriendActivity(friendsData) {
   });
 }
 
+/**
+ * Renders a leaderboard showing weekly and all-time rankings.
+ * @param {Object} currentUserData - Current user's profile and stats.
+ * @param {Array<Object>} friendsData - Friends' profile and stat data.
+ */
 function renderLeaderboard(currentUserData, friendsData) {
   const leaderboardContainer = document.querySelector('#leaderboard-container');
   leaderboardContainer.innerHTML = '';
@@ -478,6 +509,10 @@ function renderLeaderboard(currentUserData, friendsData) {
   });
 }
 
+/**
+ * Renders a visual grid of all friends with profile metadata.
+ * @param {Array<Object>} friendsData - Array of friend user data.
+ */
 function renderMyFriendsGrid(friendsData) {
   const myFriendsContainer = document.getElementById('my-friends-container');
   myFriendsContainer.innerHTML = '';
@@ -621,6 +656,10 @@ function renderMyFriendsGrid(friendsData) {
   myFriendsContainer.appendChild(myFriendsGrid);
 }
 
+/**
+ * Fetches and displays incoming and outgoing friend requests.
+ * @param {string} username - The logged-in user's username.
+ */
 async function fetchFriendRequests(username) {
   try {
     const [incomingResponse, outgoingResponse] = await Promise.all([
@@ -796,6 +835,9 @@ async function fetchFriendRequests(username) {
   }
 }
 
+/**
+ * Conditionally adds the Friends button to the navbar and initializes the popup UI.
+ */
 function addFriendsButton() {
   window.addEventListener("pageshow", async () => {
     const isDark = isDarkMode();
