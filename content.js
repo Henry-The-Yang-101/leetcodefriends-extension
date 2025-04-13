@@ -572,7 +572,7 @@ function renderMyFriendsGrid(friendsData) {
     const totalActiveDays = calendarData.totalActiveDays || 0;
 
     // Parse the submission calendar to count submissions in the last 7 days
-    let ACSubmissionsThisWeek = 0;
+    let submissionsThisWeek = 0;
     if (calendarData.submissionCalendar) {
       const calendar = JSON.parse(calendarData.submissionCalendar);
       const now = new Date();
@@ -587,7 +587,7 @@ function renderMyFriendsGrid(friendsData) {
       const sundayTimestamp = Math.floor(lastSundayUTC.getTime() / 1000);
       for (const [timestamp, count] of Object.entries(calendar)) {
         if (Number(timestamp) >= sundayTimestamp) {
-          ACSubmissionsThisWeek += Number(count);
+          submissionsThisWeek += Number(count);
         }
       }
     }
@@ -599,9 +599,9 @@ function renderMyFriendsGrid(friendsData) {
     const hardAC = stats.find(s => s.difficulty === 'Hard')?.count || 0;
 
     metadata.innerHTML = `
-      🔥 Streak: ${streak} days<br>
-      📅 This Week: ${ACSubmissionsThisWeek} AC<br>
-      🧠 Active days: ${totalActiveDays}<br>
+      🔥 Streak: ${streak} day(s)<br>
+      🧠 Total: ${totalActiveDays} day(s)<br>
+      📅 Submits This Week: ${submissionsThisWeek}<br>
       🌍 Rank: ${rank || 'N/A'}<br>
       ✅ Total AC: ${totalAC}<br>
       😁 Easy AC: ${easyAC}<br>
