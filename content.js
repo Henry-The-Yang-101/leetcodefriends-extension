@@ -434,7 +434,7 @@ function renderLeaderboard(currentUserData, friendsData) {
         statWrapper.appendChild(solvedElem);
       } else if (mode === 'weekly') {
         const weeklyElem = document.createElement('div');
-        weeklyElem.textContent = `AC This Week: ${user.weekly}`;
+        weeklyElem.textContent = `Submissions This Week: ${user.weekly}`;
         statWrapper.appendChild(weeklyElem);
       }
 
