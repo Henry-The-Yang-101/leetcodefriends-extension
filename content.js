@@ -1,7 +1,11 @@
-const baseURL = "https://leetcodefriends.online";
+const BASE_URL = "https://leetcodefriends.online";
 
 function isLeetCodeHomeForcingLightMode() {
   return window.location.pathname === '/' && !document.documentElement.classList.contains('dark');
+}
+
+function isDarkMode() {
+  return !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark");
 }
 
 function showToastMessage(message, type = "") {
@@ -54,8 +58,8 @@ async function waitForElement(selector) {
 async function loadFriendsData(username) {
   try {
     const [friendsResponse, userResponse] = await Promise.all([
-      fetch(`${baseURL}/friends?username=${username}`),
-      fetch(`${baseURL}/current-user-info?username=${username}`)
+      fetch(`${BASE_URL}/friends?username=${username}`),
+      fetch(`${BASE_URL}/current-user-info?username=${username}`)
     ]);
     const friendsResult = await friendsResponse.json();
     const userResult = await userResponse.json();
@@ -86,12 +90,12 @@ function renderFriendActivity(friendsData) {
     const fallback = document.createElement('div');
     fallback.className = 'loading-indicator';
     fallback.style.padding = '64px 0';
-    fallback.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+    fallback.style.color = isDarkMode() ? '#e0e0e0' : '#000';
     fallback.style.fontSize = '16px';
     fallback.textContent = 'You currently have no friends... :C';
     const span = document.createElement('span');
     span.style.fontSize = '13px';
-    span.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+    span.style.color = isDarkMode() ? '#e0e0e0' : '#000';
     span.textContent = 'Go make some friends in the friend requests tab! 👉👉👉';
     fallback.appendChild(document.createElement('br'));
     fallback.appendChild(span);
@@ -126,7 +130,7 @@ function renderFriendActivity(friendsData) {
     card.style.borderRadius = '8px';
     card.style.padding = '8px';
     card.style.margin = '8px 4px';
-    card.style.background = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark")
+    card.style.background = isDarkMode()
       ? (index % 2 === 0 ? "#2a2a2a" : "#1f1f1f")
       : (index % 2 === 0 ? "#fff" : "#f0f0f0");
     card.style.fontFamily = '"Roboto Mono", monospace';
@@ -182,7 +186,7 @@ function renderFriendActivity(friendsData) {
     }
     const timeSpan = document.createElement('span');
     timeSpan.style.fontSize = '13px';
-    timeSpan.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
+    timeSpan.style.color = isDarkMode() ? "#e0e0e0" : "#333";
     timeSpan.textContent = timeText;
     headerDiv.appendChild(timeSpan);
 
@@ -194,7 +198,7 @@ function renderFriendActivity(friendsData) {
     submissionTitleLink.target = '_blank';
     submissionTitleLink.textContent = item.title;
     submissionTitleLink.style.fontSize = '13px';
-    submissionTitleLink.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
+    submissionTitleLink.style.color = isDarkMode() ? "#e0e0e0" : "#333";
     submissionTitleLink.style.textAlign = 'left';
     submissionTitleLink.style.marginTop = '4px';
     submissionTitleLink.style.display = 'inline-block';
@@ -481,7 +485,7 @@ function renderMyFriendsGrid(friendsData) {
     const fallback = document.createElement('div');
     fallback.className = 'loading-indicator';
     fallback.style.padding = '64px 0';
-    fallback.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
+    fallback.style.color = isDarkMode() ? '#e0e0e0' : '#000';
     fallback.style.fontSize = '16px';
     fallback.textContent = 'You currently have no friends... :C';
     const span = document.createElement('span');
@@ -511,7 +515,7 @@ function renderMyFriendsGrid(friendsData) {
     card.style.flexDirection = 'column';
     card.style.alignItems = 'center';
     card.style.fontFamily = '"Roboto Mono", monospace';
-    card.style.backgroundColor = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? "#2a2a2a" : "#ffffff";
+    card.style.backgroundColor = isDarkMode() ? "#2a2a2a" : "#ffffff";
     card.style.borderRadius = "8px";
     card.style.padding = "12px";
     card.style.width = '100%';
@@ -557,7 +561,7 @@ function renderMyFriendsGrid(friendsData) {
 
     const metadata = document.createElement('div');
     metadata.style.fontSize = '12px';
-    metadata.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
+    metadata.style.color = isDarkMode() ? "#e0e0e0" : "#333";
     metadata.style.marginTop = '8px';
     metadata.style.textAlign = 'center';
     metadata.style.lineHeight = '1.5';
@@ -620,8 +624,8 @@ function renderMyFriendsGrid(friendsData) {
 async function fetchFriendRequests(username) {
   try {
     const [incomingResponse, outgoingResponse] = await Promise.all([
-      fetch(`${baseURL}/friend-request/incoming?username=${username}`),
-      fetch(`${baseURL}/friend-request/outgoing?username=${username}`)
+      fetch(`${BASE_URL}/friend-request/incoming?username=${username}`),
+      fetch(`${BASE_URL}/friend-request/outgoing?username=${username}`)
     ]);
     const incomingData = await incomingResponse.json();
     const outgoingData = await outgoingResponse.json();
@@ -647,7 +651,7 @@ async function fetchFriendRequests(username) {
       card.style.marginLeft = '2px';
       card.style.marginRight = '2px';
       card.style.borderRadius = '8px';
-      card.style.backgroundColor = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark") ? "#2a2a2a" : "#ffffff";
+      card.style.backgroundColor = isDarkMode() ? "#2a2a2a" : "#ffffff";
       card.style.fontFamily = '"Roboto Mono", monospace';
       card.style.boxShadow = '0 0 4px rgba(0, 0, 0, 0.2)';
 
@@ -690,7 +694,7 @@ async function fetchFriendRequests(username) {
       acceptBtn.style.transition = 'background-color 0.2s ease';
 
       acceptBtn.onclick = () => {
-        fetch(`${baseURL}/friend-request/accept`, {
+        fetch(`${BASE_URL}/friend-request/accept`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -725,7 +729,7 @@ async function fetchFriendRequests(username) {
       declineBtn.style.transition = 'background-color 0.2s ease';
 
       declineBtn.onclick = () => {
-        fetch(`${baseURL}/friend-request/decline`, {
+        fetch(`${BASE_URL}/friend-request/decline`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -794,7 +798,7 @@ async function fetchFriendRequests(username) {
 
 function addFriendsButton() {
   window.addEventListener("pageshow", async () => {
-    const isDark = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark");
+    const isDark = isDarkMode();
     const currentUrl = window.location.href;
 
     let friendsButton = document.createElement("a");
@@ -854,7 +858,7 @@ function addFriendsButton() {
           const receiverUsername = sendRequestInput.value.trim();
           if (!receiverUsername) return;
 
-          fetch(`${baseURL}/friend-request/send`, {
+          fetch(`${BASE_URL}/friend-request/send`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -931,20 +935,20 @@ function addFriendsButton() {
           button.style.borderRadius = '8px';
           button.addEventListener("mouseenter", () => {
             if (!button.classList.contains("active-tab")) {
-              const darkModeActive = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark");
+              const darkModeActive = isDarkMode();
               button.style.backgroundColor = darkModeActive ? "#333" : "#f5f5f5";
             }
           });
           button.addEventListener("mouseleave", () => {
             if (!button.classList.contains("active-tab")) {
-              const darkModeActive = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark");
+              const darkModeActive = isDarkMode();
               button.style.backgroundColor = darkModeActive ? "#1e1e1e" : "#ffffff";
             }
           });
         });
 
         function updateActiveTab(activeButton) {
-          const darkModeActive = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark");
+          const darkModeActive = isDarkMode();
           tabMapping.forEach(({ button, view }, index) => {
             button.classList.remove("active-tab");
             const isActive = button === activeButton;
@@ -1007,7 +1011,7 @@ function addFriendsButton() {
           return;
         }
 
-        fetch(`${baseURL}/user-is-registered?username=${username}`)
+        fetch(`${BASE_URL}/user-is-registered?username=${username}`)
           .then(async (res) => {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Unknown error occurred");
@@ -1031,7 +1035,7 @@ function addFriendsButton() {
               registerButton.style.cursor = "pointer";
 
               registerButton.onclick = () => {
-                fetch(`${baseURL}/register`, {
+                fetch(`${BASE_URL}/register`, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ username })
