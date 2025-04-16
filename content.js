@@ -836,7 +836,16 @@ async function fetchFriendRequests(username) {
 }
 
 /**
+ * Loads the popup UI content into the provided popup element.
  * 
+ * This function fetches the external `popup_content.html` file, populates it with dynamic
+ * DOM elements (such as the navbar, tab bar, and content views), and wires up event listeners
+ * for actions like tab switching, sending friend requests, and reloading data.
+ * 
+ * @param {HTMLElement} popup - The DOM element into which the popup content will be inserted.
+ * @param {string} username - The current user's LeetCode username.
+ * @param {boolean} isDark - Whether dark mode is currently active.
+ * @returns {Promise<HTMLElement>} - Resolves with the wrapper element containing the rendered content.
  */
 function loadPopupContent(popup, username, isDark) {
   return fetch(chrome.runtime.getURL("popup_content.html"))
