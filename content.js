@@ -847,7 +847,7 @@ async function fetchFriendRequests(username) {
  * @param {boolean} isDark - Whether dark mode is currently active.
  * @returns {Promise<HTMLElement>} - Resolves with the wrapper element containing the rendered content.
  */
-function loadPopupContent(popup, username, isDark) {
+function loadPopupContent(popup, userRef, isDark) {
   return fetch(chrome.runtime.getURL("popup_content.html"))
     .then(response => response.text())
     .then(html => {
@@ -915,7 +915,7 @@ function loadPopupContent(popup, username, isDark) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            sender_username: username,
+            sender_username: userRef.username,
             receiver_username: receiverUsername
           })
         })
@@ -926,7 +926,7 @@ function loadPopupContent(popup, username, isDark) {
           })
           .then(() => {
             sendRequestInput.value = "";
-            fetchFriendRequests(username);
+            fetchFriendRequests(userRef.username);
             showToastMessage(`Friend request sent!`, "success");
           })
           .catch((error) => showToastMessage(error.message, "error"));
@@ -969,8 +969,8 @@ function loadPopupContent(popup, username, isDark) {
             container.innerHTML = '<div class="loading-indicator">Loading...</div>';
           }
         });
-        loadFriendsData(username);
-        fetchFriendRequests(username);
+        loadFriendsData(userRef.username);
+        fetchFriendRequests(userRef.username);
         const navbar = popup.querySelector("#friends-navbar");
         if (navbar) navbar.style.display = "flex";
       };
@@ -1058,9 +1058,9 @@ function addFriendsButton() {
     popup.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.4)";
     popup.style.backgroundColor = isDark ? "#1e1e1e" : "#ffffff";
 
-    let username;
-
-    loadPopupContent(popup, username, isDark);
+    const userRef = { username: null };
+    
+    loadPopupContent(popup, userRef, isDark);
 
     const obtainer_script = document.createElement("script");
     obtainer_script.src = chrome.runtime.getURL("username_obtainer.js");
@@ -1070,7 +1070,7 @@ function addFriendsButton() {
     window.addEventListener("message", async (event) => {
       if (event.source !== window) return;
       if (event.data?.type === "LEETCODE_USERNAME") {
-        username = event.data.username;
+        userRef.username = event.data.username;
 
         const selectorMap = [
           {
@@ -1102,7 +1102,7 @@ function addFriendsButton() {
           return;
         }
 
-        fetch(`${BASE_URL}/user-is-registered?username=${username}`)
+        fetch(`${BASE_URL}/user-is-registered?username=${userRef.username}`)
           .then(async (res) => {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Unknown error occurred");
@@ -1114,7 +1114,7 @@ function addFriendsButton() {
               popupContent.innerHTML = "";
 
               const registerButton = document.createElement("button");
-              registerButton.textContent = `Register as ${username}!`;
+              registerButton.textContent = `Register as ${userRef.username}!`;
               registerButton.style.margin = "16px auto";
               registerButton.style.display = "block";
               registerButton.style.padding = "10px 20px";
@@ -1129,18 +1129,18 @@ function addFriendsButton() {
                 fetch(`${BASE_URL}/register`, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ username })
+                  body: JSON.stringify({ username: userRef.username })
                 })
                   .then(res => res.json())
                   .then(data => {
                     if (data.message?.includes("registered")) {
                       popup.innerHTML = "";
-                      loadPopupContent(popup, username, isDark).then(() => {
+                      loadPopupContent(popup, { username: userRef.username }, isDark).then(() => {
 
                         const navbar = popup.querySelector("#friends-navbar");
                         if (navbar) navbar.style.display = "flex";
-                        loadFriendsData(username);
-                        fetchFriendRequests(username);
+                        loadFriendsData(userRef.username);
+                        fetchFriendRequests(userRef.username);
                       });
                     }
                   });
@@ -1149,10 +1149,10 @@ function addFriendsButton() {
               popupContent.appendChild(registerButton);
             } else {
               // registered
-              loadFriendsData(username);
+              loadFriendsData(userRef.username);
               const navbar = popup.querySelector("#friends-navbar");
               if (navbar) navbar.style.display = "flex";
-              fetchFriendRequests(username);
+              fetchFriendRequests(userRef.username);
             }
           })
           .catch(err => showToastMessage(err, "error"));
