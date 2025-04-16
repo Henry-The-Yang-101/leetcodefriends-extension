@@ -836,6 +836,194 @@ async function fetchFriendRequests(username) {
 }
 
 /**
+ * 
+ */
+function loadPopupContent(popup, username, isDark) {
+  return fetch(chrome.runtime.getURL("popup_content.html"))
+    .then(response => response.text())
+    .then(html => {
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = html;
+
+      // Ensure a navbar exists in the loaded content.
+      let navbar = wrapper.querySelector("#friends-navbar");
+      if (!navbar) {
+        navbar = document.createElement("div");
+        navbar.id = "friends-navbar";
+        // Apply the HTML's navbar styling.
+        navbar.style.display = "none"; // default hidden; will show later
+        navbar.style.justifyContent = "center";
+        navbar.style.marginBottom = "8px";
+        navbar.style.border = "1px solid #ddd";
+        navbar.style.borderRadius = "8px";
+        navbar.style.overflow = "hidden";
+        navbar.style.flex = "2";
+
+        // Look for an existing flex container with centered content.
+        let flexContainer = wrapper.querySelector("div[style*='display: flex'][style*='justify-content: center']");
+        if (!flexContainer) {
+          // If not found, create one.
+          flexContainer = document.createElement("div");
+          flexContainer.style.display = "flex";
+          flexContainer.style.justifyContent = "center";
+          // Insert the new flex container right after the header block.
+          const header = wrapper.querySelector("div[style*='display: flex'][style*='space-between']");
+          if (header) {
+            header.insertAdjacentElement("afterend", flexContainer);
+          } else {
+            wrapper.appendChild(flexContainer);
+          }
+        }
+        // Append the navbar into the flex container.
+        flexContainer.appendChild(navbar);
+      }
+
+      const tabBar = wrapper.querySelector("div[style*='display: flex'][style*='justify-content: center'] > div");
+      tabBar.style.position = "relative";
+      tabBar.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.2)";
+      tabBar.style.borderRadius = "8px";
+      tabBar.style.overflow = "hidden";
+
+      const tabHighlight = document.createElement("div");
+      tabHighlight.style.position = "absolute";
+      tabHighlight.style.bottom = "0";
+      tabHighlight.style.left = "0";
+      tabHighlight.style.height = "32px";
+      tabHighlight.style.width = "25%";
+      tabHighlight.style.backgroundColor = "#ffa1161f";
+      tabHighlight.style.borderRadius = "8px";
+      tabHighlight.style.transition = "left 0.3s ease";
+      tabBar.insertBefore(tabHighlight, tabBar.firstChild);
+
+      const sendRequestInput = wrapper.querySelector("#send-friend-request-input");
+      const sendRequestButton = wrapper.querySelector("#send-friend-request-button");
+
+      function sendRequest() {
+        const receiverUsername = sendRequestInput.value.trim();
+        if (!receiverUsername) return;
+
+        fetch(`${BASE_URL}/friend-request/send`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sender_username: username,
+            receiver_username: receiverUsername
+          })
+        })
+          .then(async (res) => {
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Unknown error occurred");
+            return data;
+          })
+          .then(() => {
+            sendRequestInput.value = "";
+            fetchFriendRequests(username);
+            showToastMessage(`Friend request sent!`, "success");
+          })
+          .catch((error) => showToastMessage(error.message, "error"));
+      }
+
+      sendRequestButton.style.transition = 'background-color 0.2s ease';
+      sendRequestButton.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+      sendRequestButton.addEventListener('mouseenter', () => {
+        sendRequestButton.style.backgroundColor = '#e69500';
+      });
+      sendRequestButton.addEventListener('mouseleave', () => {
+        sendRequestButton.style.backgroundColor = '#ffa116';
+      });
+      sendRequestButton.addEventListener("click", sendRequest);
+      sendRequestInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") sendRequest();
+      });
+
+      popup.appendChild(wrapper);
+
+      const reloadButton = popup.querySelector("#reload-button");
+      reloadButton.style.transition = 'color 0.2s ease, background-color 0.2s ease';
+      reloadButton.addEventListener("mouseenter", () => {
+        reloadButton.style.color = "#ffa116";
+      });
+      reloadButton.addEventListener("mouseleave", () => {
+        reloadButton.style.color = isDark ? "#e0e0e0" : "#333";
+      });
+      reloadButton.onclick = () => {
+        showToastMessage("Reloading data!");
+        const views = [
+          "#friends-container",
+          "#leaderboard-container",
+          "#my-friends-container",
+          "#friend-requests-container"
+        ];
+        views.forEach(selector => {
+          const container = popup.querySelector(selector);
+          if (container) {
+            container.innerHTML = '<div class="loading-indicator">Loading...</div>';
+          }
+        });
+        loadFriendsData(username);
+        fetchFriendRequests(username);
+        const navbar = popup.querySelector("#friends-navbar");
+        if (navbar) navbar.style.display = "flex";
+      };
+
+      const tabMapping = [
+        {
+          button: wrapper.querySelector("#friend-activity-tab"),
+          view: wrapper.querySelector("#friend-activity-view")
+        },
+        {
+          button: wrapper.querySelector("#leaderboard-tab"),
+          view: wrapper.querySelector("#leaderboard-view")
+        },
+        {
+          button: wrapper.querySelector("#my-friends-tab"),
+          view: wrapper.querySelector("#my-friends-view")
+        },
+        {
+          button: wrapper.querySelector("#friend-requests-tab"),
+          view: wrapper.querySelector("#friend-requests-view")
+        }
+      ];
+
+      function updateActiveTab(activeButton) {
+        const darkModeActive = isDarkMode();
+        tabMapping.forEach(({ button, view }, index) => {
+          const isActive = button === activeButton;
+          button.classList.toggle("active-tab", isActive);
+          button.style.backgroundColor = isActive ? "transparent" : (darkModeActive ? "#1e1e1e" : "#ffffff");
+          button.style.color = isActive ? "#ffa116" : (darkModeActive ? "#e0e0e0" : "#333");
+          view.style.display = isActive ? "block" : "none";
+          if (isActive) tabHighlight.style.left = `${index * 25}%`;
+        });
+      }
+
+      tabMapping.forEach(({ button }) => {
+        button.style.transition = 'background-color 0.2s ease, color 0.2s ease';
+        button.style.borderRadius = '8px';
+        button.addEventListener("click", () => updateActiveTab(button));
+        button.addEventListener("mouseenter", () => {
+          if (!button.classList.contains("active-tab")) {
+            const darkModeActive = isDarkMode();
+            button.style.backgroundColor = darkModeActive ? "#333" : "#f5f5f5";
+          }
+        });
+        button.addEventListener("mouseleave", () => {
+          if (!button.classList.contains("active-tab")) {
+            const darkModeActive = isDarkMode();
+            button.style.backgroundColor = darkModeActive ? "#1e1e1e" : "#ffffff";
+          }
+        });
+      });
+
+      updateActiveTab(tabMapping[0].button);
+      return wrapper;
+    })
+    .catch(error => {
+      console.error("Failed to load external HTML:", error);
+    });
+}
+
+/**
  * Conditionally adds the Friends button to the navbar and initializes the popup UI.
  */
 function addFriendsButton() {
@@ -860,158 +1048,10 @@ function addFriendsButton() {
     popup.style.zIndex = "9999";
     popup.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.4)";
     popup.style.backgroundColor = isDark ? "#1e1e1e" : "#ffffff";
-    let sendRequestInput;
-    let sendRequestButton;
+
     let username;
 
-    fetch(chrome.runtime.getURL("popup_content.html"))
-      .then(response => response.text())
-      .then(html => {
-        const wrapper = document.createElement("div");
-        wrapper.innerHTML = html;
-        const tabBar = wrapper.querySelector("div[style*='display: flex'][style*='justify-content: center'] > div");
-        tabBar.style.position = "relative";
-        tabBar.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.2)";
-        tabBar.style.borderRadius = "8px";
-        tabBar.style.overflow = "hidden";
-
-        const tabHighlight = document.createElement("div");
-        tabHighlight.style.position = "absolute";
-        tabHighlight.style.top = "0";
-        tabHighlight.style.left = "0";
-        tabHighlight.style.height = "100%";
-        tabHighlight.style.width = "25%";
-        tabHighlight.style.backgroundColor = "#ffa1161f";
-        tabHighlight.style.borderRadius = "8px";
-        tabHighlight.style.transition = "left 0.3s ease";
-        tabBar.insertBefore(tabHighlight, tabBar.firstChild);
-
-        sendRequestInput = wrapper.querySelector("#send-friend-request-input");
-        sendRequestButton = wrapper.querySelector("#send-friend-request-button");
-        sendRequestButton.style.transition = 'background-color 0.2s ease';
-        sendRequestButton.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
-        sendRequestButton.addEventListener('mouseenter', () => {
-          sendRequestButton.style.backgroundColor = '#e69500';
-        });
-        sendRequestButton.addEventListener('mouseleave', () => {
-          sendRequestButton.style.backgroundColor = '#ffa116';
-        });
-        function sendRequest() {
-          const receiverUsername = sendRequestInput.value.trim();
-          if (!receiverUsername) return;
-
-          fetch(`${BASE_URL}/friend-request/send`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              sender_username: username,
-              receiver_username: receiverUsername
-            })
-          })
-            .then(async (res) => {
-              const data = await res.json();
-              if (!res.ok) throw new Error(data.error || "Unknown error occurred");
-              return data;
-            })
-            .then(() => {
-              sendRequestInput.value = "";
-              fetchFriendRequests(username);
-              showToastMessage(`Friend request sent!`, "success");
-            })
-            .catch((error) => showToastMessage(error, "error"));
-        }
-
-        sendRequestButton.addEventListener("click", sendRequest);
-        sendRequestInput.addEventListener("keypress", (event) => {
-          if (event.key === "Enter") sendRequest();
-        });
-
-        popup.appendChild(wrapper);
-        const reloadButton = popup.querySelector("#reload-button");
-        reloadButton.style.transition = 'color 0.2s ease, background-color 0.2s ease';
-
-        reloadButton.addEventListener("mouseenter", () => {
-          reloadButton.style.color = "#ffa116";
-        });
-        reloadButton.addEventListener("mouseleave", () => {
-          reloadButton.style.color = isDark ? "#e0e0e0" : "#333";
-        });
-        reloadButton.onclick = () => {
-          showToastMessage("Reloading data!");
-          const views = [
-            "#friends-container",
-            "#leaderboard-container",
-            "#my-friends-container",
-            "#friend-requests-container"
-          ];
-          views.forEach(selector => {
-            const container = popup.querySelector(selector);
-            if (container) {
-              container.innerHTML = '<div class="loading-indicator">Loading...</div>';
-            }
-          });
-          loadFriendsData(username);
-          fetchFriendRequests(username);
-          const navbar = popup.querySelector("#friends-navbar");
-          if (navbar) navbar.style.display = "flex";
-        };
-
-        const friendActivityTab = wrapper.querySelector("#friend-activity-tab");
-        const leaderboardTab = wrapper.querySelector("#leaderboard-tab");
-        const myFriendsTab = wrapper.querySelector("#my-friends-tab");
-        const friendsView = wrapper.querySelector("#friend-activity-view");
-        const leaderboardView = wrapper.querySelector("#leaderboard-view");
-        const friendRequestsTab = wrapper.querySelector("#friend-requests-tab");
-        const friendRequestsView = wrapper.querySelector("#friend-requests-view");
-        const myFriendsView = wrapper.querySelector("#my-friends-view");
-
-        const tabMapping = [
-          { button: friendActivityTab, view: friendsView },
-          { button: leaderboardTab, view: leaderboardView },
-          { button: myFriendsTab, view: myFriendsView },
-          { button: friendRequestsTab, view: friendRequestsView },
-        ];
-        updateActiveTab(friendActivityTab);
-        tabMapping.forEach(({ button }) => {
-          button.style.transition = 'background-color 0.2s ease, color 0.2s ease';
-          button.style.borderRadius = '8px';
-          button.addEventListener("mouseenter", () => {
-            if (!button.classList.contains("active-tab")) {
-              const darkModeActive = isDarkMode();
-              button.style.backgroundColor = darkModeActive ? "#333" : "#f5f5f5";
-            }
-          });
-          button.addEventListener("mouseleave", () => {
-            if (!button.classList.contains("active-tab")) {
-              const darkModeActive = isDarkMode();
-              button.style.backgroundColor = darkModeActive ? "#1e1e1e" : "#ffffff";
-            }
-          });
-        });
-
-        function updateActiveTab(activeButton) {
-          const darkModeActive = isDarkMode();
-          tabMapping.forEach(({ button, view }, index) => {
-            button.classList.remove("active-tab");
-            const isActive = button === activeButton;
-            button.style.backgroundColor = isActive ? "transparent" : (darkModeActive ? "#1e1e1e" : "#ffffff");
-            button.style.color = isActive ? "#ffa116" : (darkModeActive ? "#e0e0e0" : "#333");
-            view.style.display = isActive ? "block" : "none";
-            if (isActive) {
-              button.classList.add("active-tab");
-              tabHighlight.style.left = `${index * 25}%`;
-            }
-          });
-        }
-
-        // Attach a single event listener to each tab button
-        tabMapping.forEach(({ button }) => {
-          button.addEventListener("click", () => updateActiveTab(button));
-        });
-      })
-      .catch(error => {
-        console.error("Failed to load external HTML:", error);
-      });
+    loadPopupContent(popup, username, isDark);
 
     const obtainer_script = document.createElement("script");
     obtainer_script.src = chrome.runtime.getURL("username_obtainer.js");
@@ -1085,18 +1125,14 @@ function addFriendsButton() {
                   .then(res => res.json())
                   .then(data => {
                     if (data.message?.includes("registered")) {
-                      fetch(chrome.runtime.getURL("popup_content.html"))
-                        .then(response => response.text())
-                        .then(html => {
-                          popup.innerHTML = "";
-                          const wrapper = document.createElement("div");
-                          wrapper.innerHTML = html;
-                          popup.appendChild(wrapper);
-                          const navbar = popup.querySelector("#friends-navbar");
-                          if (navbar) navbar.style.display = "flex";
-                          loadFriendsData(username);
-                          fetchFriendRequests(username);
-                        });
+                      popup.innerHTML = "";
+                      loadPopupContent(popup, username, isDark).then(() => {
+
+                        const navbar = popup.querySelector("#friends-navbar");
+                        if (navbar) navbar.style.display = "flex";
+                        loadFriendsData(username);
+                        fetchFriendRequests(username);
+                      });
                     }
                   });
               };
