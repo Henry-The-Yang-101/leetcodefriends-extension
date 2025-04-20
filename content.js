@@ -535,7 +535,7 @@ function renderMyFriendsGrid(friendsData) {
 
   const myFriendsGrid = document.createElement('div');
   myFriendsGrid.style.display = 'grid';
-  myFriendsGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+  myFriendsGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
   myFriendsGrid.style.justifyContent = 'center';
   myFriendsGrid.style.gap = '16px';
   myFriendsGrid.style.marginTop = '12px';
@@ -553,6 +553,7 @@ function renderMyFriendsGrid(friendsData) {
     card.style.backgroundColor = isDarkMode() ? "#2a2a2a" : "#ffffff";
     card.style.borderRadius = "8px";
     card.style.padding = "12px";
+    card.style.background = isDarkMode() ? "#1e1e1e" : "#f9f9f9";
     card.style.width = '100%';
     card.style.boxSizing = 'border-box';
     // Removed hover effect from card
@@ -638,10 +639,10 @@ function renderMyFriendsGrid(friendsData) {
     const hardAC = stats.find(s => s.difficulty === 'Hard')?.count || 0;
 
     metadata.innerHTML = `
-      🔥 Streak: ${streak} day(s)<br>
-      🧠 Total: ${totalActiveDays} day(s)<br>
+      🔥 Max Streak: ${streak} day(s)<br>
+      🧠 Total Active Days: ${totalActiveDays} day(s)<br>
       📅 Submits This Week: ${submissionsThisWeek}<br>
-      🌍 Rank: ${rank || 'N/A'}<br>
+      🌍 Global Rank: ${rank || 'N/A'}<br>
       ✅ Total AC: ${totalAC}<br>
       😁 Easy AC: ${easyAC}<br>
       😐 Med AC: ${mediumAC}<br>
@@ -1175,7 +1176,7 @@ function addFriendsButton() {
         popup.style.top = (rect.bottom + window.scrollY + 12) + 'px';
         popup.style.right = '3px';
         popup.style.height = 'auto';
-        popup.style.maxHeight = (window.innerHeight - 57) + 'px';
+        popup.style.maxHeight = (window.innerHeight - 47) + 'px';
         const minWidth = 360;
         const maxWidth = 640;
         const clampedWidth = Math.max(minWidth, maxWidth);
