@@ -645,7 +645,7 @@ function renderMyFriendsGrid(friendsData) {
       🌍 Global Rank: ${rank || 'N/A'}<br>
       ✅ Total AC: ${totalAC}<br>
       😁 Easy AC: ${easyAC}<br>
-      😐 Med AC: ${mediumAC}<br>
+      😐 Medium AC: ${mediumAC}<br>
       🫠 Hard AC: ${hardAC}
     `;
 
@@ -671,6 +671,48 @@ async function fetchFriendRequests(username) {
     const outgoingData = await outgoingResponse.json();
     const incoming = incomingData.incoming_friend_requests || [];
     const outgoing = outgoingData.outgoing_friend_requests || [];
+    // Add red dot indicator on Friend Requests tab if there are incoming requests
+    const tabButton = document.querySelector("#friend-requests-tab");
+    if (tabButton) {
+      // Remove any existing dot
+      const existingDot = tabButton.querySelector('.request-dot');
+      if (existingDot) existingDot.remove();
+      // If there are incoming requests, add a red dot
+      if (incoming.length > 0) {
+        tabButton.style.position = 'relative';
+        const dot = document.createElement('span');
+        dot.className = 'request-dot';
+        dot.style.position = 'absolute';
+        dot.style.top = '4px';
+        dot.style.right = '4px';
+        dot.style.width = '8px';
+        dot.style.height = '8px';
+        dot.style.backgroundColor = '#ff0000';
+        dot.style.borderRadius = '50%';
+        tabButton.appendChild(dot);
+      }
+    }
+    const navbarButton = document.querySelector("#friends-button");
+    if (navbarButton) {
+      // Clean up any old dot
+      const oldDot = navbarButton.querySelector(".navbar-indicator-dot");
+      if (oldDot) oldDot.remove();
+
+      if (incoming.length > 0) {
+        // ensure the button is position:relative (it already is, thanks to Tailwind’s "relative" class)
+        navbarButton.style.position = "relative";
+        const dot = document.createElement("span");
+        dot.className = "navbar-indicator-dot";
+        dot.style.position = "absolute";
+        dot.style.top = "4px";
+        dot.style.right = "4px";
+        dot.style.width = "6px";
+        dot.style.height = "6px";
+        dot.style.backgroundColor = "#ff0000";
+        dot.style.borderRadius = "50%";
+        navbarButton.appendChild(dot);
+      }
+    }
     const requestsContainer = document.querySelector("#friend-requests-container");
     requestsContainer.innerHTML = '';
     if (incoming.length === 0) {
@@ -1049,6 +1091,7 @@ function addFriendsButton() {
       </svg>
     `;
     friendsButton.title = "Friends";
+    friendsButton.id = "friends-button";
 
     const popup = document.createElement("div");
     // Set popup styling with opacity transition for smooth fade in/out (position will be set dynamically)
@@ -1061,7 +1104,7 @@ function addFriendsButton() {
     popup.style.backgroundColor = isDark ? "#1e1e1e" : "#ffffff";
 
     const userRef = { username: null };
-    
+
     loadPopupContent(popup, userRef, isDark);
 
     const obtainer_script = document.createElement("script");
