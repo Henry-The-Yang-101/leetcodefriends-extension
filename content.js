@@ -1080,6 +1080,8 @@ function loadPopupContent(popup, userRef, isDark) {
  */
 function addFriendsButton() {
   window.addEventListener("pageshow", async () => {
+    // Prevent duplicate button insertions
+    if (document.getElementById('friends-button')) return;
     const isDark = isDarkMode();
     const currentUrl = window.location.href;
 
@@ -1256,21 +1258,31 @@ function addFriendsButton() {
 
 addFriendsButton();
 
-// Re-insert Friends button on LeetCode SPA navigation (pushState/replaceState/popstate)
+// SPA navigation watcher: re-add Friends button on URL changes
 (function() {
-  const originalPush = history.pushState;
-  const originalReplace = history.replaceState;
-  history.pushState = function(...args) {
-    const result = originalPush.apply(this, args);
-    window.dispatchEvent(new Event('pageshow'));
-    return result;
-  };
-  history.replaceState = function(...args) {
-    const result = originalReplace.apply(this, args);
-    window.dispatchEvent(new Event('pageshow'));
-    return result;
-  };
+  let lastPath = location.pathname;
+  const urlObserver = new MutationObserver(() => {
+    if (location.pathname !== lastPath) {
+      lastPath = location.pathname;
+      // Remove existing button if present
+      const existing = document.getElementById('friends-button');
+      if (existing) {
+        existing.remove();
+      }
+      addFriendsButton();
+    }
+  });
+  urlObserver.observe(document.body, { childList: true, subtree: true });
+
+  // Also catch back/forward navigation
   window.addEventListener('popstate', () => {
-    window.dispatchEvent(new Event('pageshow'));
+    if (location.pathname !== lastPath) {
+      lastPath = location.pathname;
+      const existing = document.getElementById('friends-button');
+      if (existing) {
+        existing.remove();
+      }
+      addFriendsButton();
+    }
   });
 })();
