@@ -1121,7 +1121,7 @@ function addFriendsButton() {
           {
             pattern: "https://leetcode.com/problems/",
             selector: "nav.z-nav-1 .relative.ml-4.flex.items-center.gap-2",
-            insertIndex: 3
+            insertIndex: 4
           },
           {
             pattern: "https://leetcode.com",
@@ -1255,3 +1255,22 @@ function addFriendsButton() {
 }
 
 addFriendsButton();
+
+// Re-insert Friends button on LeetCode SPA navigation (pushState/replaceState/popstate)
+(function() {
+  const originalPush = history.pushState;
+  const originalReplace = history.replaceState;
+  history.pushState = function(...args) {
+    const result = originalPush.apply(this, args);
+    window.dispatchEvent(new Event('pageshow'));
+    return result;
+  };
+  history.replaceState = function(...args) {
+    const result = originalReplace.apply(this, args);
+    window.dispatchEvent(new Event('pageshow'));
+    return result;
+  };
+  window.addEventListener('popstate', () => {
+    window.dispatchEvent(new Event('pageshow'));
+  });
+})();
