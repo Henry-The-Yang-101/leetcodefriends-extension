@@ -1098,7 +1098,7 @@ function addFriendsButton() {
     const popup = document.createElement("div");
     // Set popup styling with opacity transition for smooth fade in/out (position will be set dynamically)
     popup.className = "absolute text-text-secondary dark:text-dark-text-secondary rounded shadow-2xl p-2 pt-3 text-sm transition-opacity duration-200";
-    popup.style.position = "fixed";
+    popup.style.position = "absolute";
     popup.style.opacity = "0";
     popup.style.pointerEvents = "none";
     popup.style.zIndex = "9999";
