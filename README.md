@@ -15,10 +15,9 @@ With this extension, the often tedious and hair-pulling experience of the LeetCo
 
 ## 🛠️ How to Use
 
-1. Install the extension (for now, clone repo, go to [manage extensions](chrome://extensions/), click "Load unpacked", select the `leetcodefriends-extension` folder)
+1. Install the [Chrome extension](https://chromewebstore.google.com/detail/leetcode-friends/edccadalfhaegaflhhodadmhoffmmhdk)
 2. Visit [leetcode.com](https://leetcode.com)
 3. Click the 🧑‍🤝‍🧑 Friends icon in the navigation bar
 4. Add other friends with the LeetCode Friends Extension by their LeetCode usernames
 5. Track everyone's coding streaks, submissions, and rankings!
 
-Level up your grind — and bring your friends along for the ride!
