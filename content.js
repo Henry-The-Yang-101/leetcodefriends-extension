@@ -1121,7 +1121,7 @@ async function addFriendsButton() {
       const selectorMap = [
         {
           pattern: "https://leetcode.com/problems/",
-          selector: "nav.z-nav-1 .relative.ml-4.flex.items-center.gap-2",
+          selector: "div.relative.flex.items-center.justify-end.gap-2",
           insertIndex: 4
         },
         {

@@ -20,4 +20,3 @@ With this extension, the often tedious and hair-pulling experience of the LeetCo
 3. Click the 🧑‍🤝‍🧑 Friends icon in the navigation bar
 4. Add other friends with the LeetCode Friends Extension by their LeetCode usernames
 5. Track everyone's coding streaks, submissions, and rankings!
-
