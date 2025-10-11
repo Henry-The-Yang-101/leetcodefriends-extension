@@ -76,12 +76,14 @@ async function waitForElement(selector) {
 /**
  * Fetches current user and friends data, and triggers rendering of views.
  * @param {string} username - The current user's LeetCode username.
+ * @param {boolean} fresh - If true, bypasses cache and fetches fresh data from LeetCode.
  */
-async function loadFriendsData(username) {
+async function loadFriendsData(username, fresh = false) {
   try {
+    const freshParam = fresh ? '&fresh=true' : '';
     const [friendsResponse, userResponse] = await Promise.all([
-      fetch(`${BASE_URL}/friends?username=${username}`),
-      fetch(`${BASE_URL}/current-user-info?username=${username}`)
+      fetch(`${BASE_URL}/friends?username=${username}${freshParam}`),
+      fetch(`${BASE_URL}/current-user-info?username=${username}${freshParam}`)
     ]);
     const friendsResult = await friendsResponse.json();
     const userResult = await userResponse.json();
@@ -1012,7 +1014,7 @@ function loadPopupContent(popup, userRef, isDark) {
             container.innerHTML = '<div class="loading-indicator">Loading...</div>';
           }
         });
-        loadFriendsData(userRef.username);
+        loadFriendsData(userRef.username, true);
         fetchFriendRequests(userRef.username);
         const navbar = popup.querySelector("#friends-navbar");
         if (navbar) navbar.style.display = "flex";
