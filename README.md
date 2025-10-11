@@ -1,4 +1,4 @@
-# LeetCode Friends Version 1.0 🚀
+# LeetCode Friends Version 1.0.8 🚀
 
 LeetCode Friends is a Chrome extension that lets you add friends and track their LeetCode progress in a glance, right from within [leetcode.com](https://leetcode.com)! 
 
