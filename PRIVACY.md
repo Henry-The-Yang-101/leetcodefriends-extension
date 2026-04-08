@@ -5,7 +5,7 @@
 ## What We Collect
 
 - The extension reads your **LeetCode username** from the site to identify your profile.
-- It sends your username to our backend (`https://leetcodefriends.online`) to retrieve your friends list and leaderboard data.
+- It sends your username to our backend (`d1x2mfntd2shiz.cloudfront.net`) to retrieve your friends list and leaderboard data.
 
 ## What We Don’t Collect
 
