@@ -653,6 +653,31 @@ function renderMyFriendsGrid(friendsData) {
 
     card.appendChild(metadata);
 
+    const challengeBtn = document.createElement('button');
+    challengeBtn.textContent = '⚔️ Challenge';
+    challengeBtn.style.marginTop = '10px';
+    challengeBtn.style.padding = '6px 14px';
+    challengeBtn.style.backgroundColor = '#ffa116';
+    challengeBtn.style.color = 'white';
+    challengeBtn.style.border = 'none';
+    challengeBtn.style.borderRadius = '6px';
+    challengeBtn.style.cursor = 'pointer';
+    challengeBtn.style.fontFamily = '"Roboto Mono", monospace';
+    challengeBtn.style.fontSize = '12px';
+    challengeBtn.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+    challengeBtn.style.transition = 'background-color 0.2s ease';
+    challengeBtn.addEventListener('mouseenter', () => {
+      challengeBtn.style.backgroundColor = '#e69500';
+    });
+    challengeBtn.addEventListener('mouseleave', () => {
+      challengeBtn.style.backgroundColor = '#ffa116';
+    });
+    challengeBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      openChallengeModal(username, challengeBtn);
+    });
+    card.appendChild(challengeBtn);
+
     myFriendsGrid.appendChild(card);
   });
 
@@ -881,6 +906,304 @@ async function fetchFriendRequests(username) {
 }
 
 /**
+ * Fetches and displays pending incoming challenge invites.
+ * @param {string} username - The logged-in user's username.
+ */
+async function fetchPendingChallenges(username) {
+  try {
+    const response = await fetch(`${BASE_URL}/challenges/pending?username=${username}`);
+    const data = await response.json();
+    const pending = data.pending_challenges || [];
+
+    const tabButton = document.querySelector("#challenges-tab");
+    if (tabButton) {
+      const existingDot = tabButton.querySelector('.request-dot');
+      if (existingDot) existingDot.remove();
+      if (pending.length > 0) {
+        tabButton.style.position = 'relative';
+        const dot = document.createElement('span');
+        dot.className = 'request-dot';
+        dot.style.position = 'absolute';
+        dot.style.top = '4px';
+        dot.style.right = '4px';
+        dot.style.width = '8px';
+        dot.style.height = '8px';
+        dot.style.backgroundColor = '#ff0000';
+        dot.style.borderRadius = '50%';
+        tabButton.appendChild(dot);
+      }
+    }
+
+    const container = document.querySelector("#challenges-container");
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (pending.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'loading-indicator';
+      empty.textContent = 'No pending challenges. Challenge a friend from the My Friends tab!';
+      container.appendChild(empty);
+      return;
+    }
+
+    pending.forEach(challenge => {
+      container.appendChild(buildChallengeCard(challenge, username));
+    });
+  } catch (error) {
+    console.error("Failed to load pending challenges:", error);
+  }
+}
+
+/**
+ * Builds a single pending-challenge card with Accept/Decline actions.
+ * @param {Object} challenge - Challenge row from GET /challenges/pending.
+ * @param {string} username - The logged-in user's username (the opponent).
+ */
+function buildChallengeCard(challenge, username) {
+  const card = document.createElement('div');
+  card.style.display = 'flex';
+  card.style.flexDirection = 'column';
+  card.style.gap = '8px';
+  card.style.padding = '12px';
+  card.style.marginBottom = '12px';
+  card.style.marginLeft = '2px';
+  card.style.marginRight = '2px';
+  card.style.borderRadius = '8px';
+  card.style.backgroundColor = isDarkMode() ? "#2a2a2a" : "#ffffff";
+  card.style.fontFamily = '"Roboto Mono", monospace';
+  card.style.boxShadow = '0 0 4px rgba(0, 0, 0, 0.2)';
+
+  const info = document.createElement('div');
+  info.style.fontSize = '14px';
+  info.style.color = isDarkMode() ? "#e0e0e0" : "#333";
+
+  const challengerLink = document.createElement('a');
+  challengerLink.href = `https://leetcode.com/u/${challenge.challenger_username}`;
+  challengerLink.target = '_blank';
+  challengerLink.textContent = challenge.challenger_username;
+  challengerLink.style.fontWeight = 'bold';
+  challengerLink.style.color = '#ffa116';
+  challengerLink.style.textDecoration = 'none';
+
+  info.appendChild(document.createTextNode('⚔️ '));
+  info.appendChild(challengerLink);
+  info.appendChild(document.createTextNode(` challenged you to `));
+
+  const problemLink = document.createElement('a');
+  problemLink.href = `https://leetcode.com/problems/${challenge.title_slug}`;
+  problemLink.target = '_blank';
+  problemLink.textContent = challenge.title || challenge.title_slug;
+  problemLink.style.color = '#ffa116';
+  problemLink.style.textDecoration = 'none';
+  info.appendChild(problemLink);
+
+  const actions = document.createElement('div');
+  actions.style.display = 'flex';
+  actions.style.gap = '8px';
+
+  const acceptBtn = document.createElement('button');
+  acceptBtn.textContent = 'Accept';
+  acceptBtn.style.backgroundColor = '#28a745';
+  acceptBtn.style.color = '#fff';
+  acceptBtn.style.border = 'none';
+  acceptBtn.style.borderRadius = '4px';
+  acceptBtn.style.padding = '6px 12px';
+  acceptBtn.style.fontFamily = '"Roboto Mono", monospace';
+  acceptBtn.style.cursor = 'pointer';
+  acceptBtn.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+  acceptBtn.onclick = () => {
+    window.LCFMatch?.acceptChallenge(challenge.id);
+    showToastMessage("Challenge accepted! Get ready...", "success");
+  };
+
+  const declineBtn = document.createElement('button');
+  declineBtn.textContent = 'Decline';
+  declineBtn.style.backgroundColor = '#dc3545';
+  declineBtn.style.color = '#fff';
+  declineBtn.style.border = 'none';
+  declineBtn.style.borderRadius = '4px';
+  declineBtn.style.padding = '6px 12px';
+  declineBtn.style.fontFamily = '"Roboto Mono", monospace';
+  declineBtn.style.cursor = 'pointer';
+  declineBtn.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+  declineBtn.onclick = () => {
+    window.LCFMatch?.declineChallenge(challenge.id);
+    card.remove();
+    showToastMessage("Challenge declined.", "error");
+  };
+
+  actions.appendChild(acceptBtn);
+  actions.appendChild(declineBtn);
+  card.appendChild(info);
+  card.appendChild(actions);
+  return card;
+}
+
+/**
+ * Shows a floating, always-visible notification (independent of the Friends
+ * popup, which may be closed) when a challenge invite arrives in real time.
+ * @param {Object} data - challenge:incoming payload from the socket relay.
+ */
+function showIncomingChallengeToast(data) {
+  const toast = document.createElement('div');
+  toast.style.position = 'fixed';
+  toast.style.top = '16px';
+  toast.style.right = '16px';
+  toast.style.zIndex = '2147483647';
+  toast.style.backgroundColor = isDarkMode() ? "#1e1e1e" : "#ffffff";
+  toast.style.color = isDarkMode() ? "#e0e0e0" : "#333";
+  toast.style.padding = '16px';
+  toast.style.borderRadius = '10px';
+  toast.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.4)';
+  toast.style.fontFamily = '"Roboto Mono", monospace';
+  toast.style.maxWidth = '280px';
+
+  const title = document.createElement('div');
+  title.textContent = `⚔️ ${data.challenger_username} challenged you!`;
+  title.style.fontWeight = 'bold';
+  title.style.marginBottom = '6px';
+
+  const subtitle = document.createElement('div');
+  subtitle.textContent = data.title || data.title_slug;
+  subtitle.style.fontSize = '13px';
+  subtitle.style.marginBottom = '10px';
+  subtitle.style.opacity = '0.85';
+
+  const actions = document.createElement('div');
+  actions.style.display = 'flex';
+  actions.style.gap = '8px';
+
+  const acceptBtn = document.createElement('button');
+  acceptBtn.textContent = 'Accept';
+  acceptBtn.style.flex = '1';
+  acceptBtn.style.backgroundColor = '#28a745';
+  acceptBtn.style.color = '#fff';
+  acceptBtn.style.border = 'none';
+  acceptBtn.style.borderRadius = '4px';
+  acceptBtn.style.padding = '6px 0';
+  acceptBtn.style.fontFamily = '"Roboto Mono", monospace';
+  acceptBtn.style.cursor = 'pointer';
+  acceptBtn.onclick = () => {
+    window.LCFMatch?.acceptChallenge(data.challenge_id);
+    toast.remove();
+  };
+
+  const declineBtn = document.createElement('button');
+  declineBtn.textContent = 'Decline';
+  declineBtn.style.flex = '1';
+  declineBtn.style.backgroundColor = '#dc3545';
+  declineBtn.style.color = '#fff';
+  declineBtn.style.border = 'none';
+  declineBtn.style.borderRadius = '4px';
+  declineBtn.style.padding = '6px 0';
+  declineBtn.style.fontFamily = '"Roboto Mono", monospace';
+  declineBtn.style.cursor = 'pointer';
+  declineBtn.onclick = () => {
+    window.LCFMatch?.declineChallenge(data.challenge_id);
+    toast.remove();
+  };
+
+  actions.appendChild(acceptBtn);
+  actions.appendChild(declineBtn);
+  toast.appendChild(title);
+  toast.appendChild(subtitle);
+  toast.appendChild(actions);
+  document.body.appendChild(toast);
+
+  setTimeout(() => toast.remove(), 30000);
+}
+
+/**
+ * Opens a small floating modal to pick a LeetCode problem to challenge a
+ * friend to, anchored near the button that triggered it.
+ * @param {string} opponentUsername - The friend being challenged.
+ * @param {HTMLElement} anchorEl - Element to position the modal near.
+ */
+function openChallengeModal(opponentUsername, anchorEl) {
+  document.querySelectorAll('.lcf-challenge-modal').forEach(el => el.remove());
+
+  const modal = document.createElement('div');
+  modal.className = 'lcf-challenge-modal';
+  modal.style.position = 'fixed';
+  modal.style.zIndex = '2147483647';
+  modal.style.backgroundColor = isDarkMode() ? "#1e1e1e" : "#ffffff";
+  modal.style.color = isDarkMode() ? "#e0e0e0" : "#333";
+  modal.style.padding = '16px';
+  modal.style.borderRadius = '10px';
+  modal.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.4)';
+  modal.style.fontFamily = '"Roboto Mono", monospace';
+  modal.style.width = '260px';
+
+  const rect = anchorEl.getBoundingClientRect();
+  modal.style.top = `${rect.bottom + 8}px`;
+  modal.style.left = `${Math.max(8, rect.left - 100)}px`;
+
+  const title = document.createElement('div');
+  title.textContent = `Challenge ${opponentUsername}`;
+  title.style.fontWeight = 'bold';
+  title.style.marginBottom = '8px';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.placeholder = 'Problem URL or slug, e.g. two-sum';
+  input.style.width = '100%';
+  input.style.boxSizing = 'border-box';
+  input.style.padding = '6px 10px';
+  input.style.marginBottom = '8px';
+  input.style.border = '1px solid #ccc';
+  input.style.borderRadius = '4px';
+  input.style.fontFamily = '"Roboto Mono", monospace';
+
+  const sendBtn = document.createElement('button');
+  sendBtn.textContent = 'Send Challenge';
+  sendBtn.style.width = '100%';
+  sendBtn.style.padding = '8px 0';
+  sendBtn.style.backgroundColor = '#ffa116';
+  sendBtn.style.color = 'white';
+  sendBtn.style.border = 'none';
+  sendBtn.style.borderRadius = '4px';
+  sendBtn.style.cursor = 'pointer';
+  sendBtn.style.fontFamily = '"Roboto Mono", monospace';
+
+  function slugify(rawValue) {
+    const match = rawValue.match(/\/problems\/([^/]+)/);
+    if (match) return match[1];
+    return rawValue.trim().toLowerCase().replace(/\s+/g, '-');
+  }
+
+  function prettifyTitle(slug) {
+    return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  }
+
+  sendBtn.onclick = () => {
+    const raw = input.value.trim();
+    if (!raw) return;
+    const slug = slugify(raw);
+    window.LCFMatch?.sendChallenge(opponentUsername, slug, prettifyTitle(slug));
+    showToastMessage(`Challenge sent to ${opponentUsername}!`, "success");
+    modal.remove();
+  };
+
+  input.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') sendBtn.click();
+  });
+
+  modal.appendChild(title);
+  modal.appendChild(input);
+  modal.appendChild(sendBtn);
+  document.body.appendChild(modal);
+  input.focus();
+
+  const closeOnClickOutside = (event) => {
+    if (!modal.contains(event.target) && event.target !== anchorEl) {
+      modal.remove();
+      document.removeEventListener('click', closeOnClickOutside);
+    }
+  };
+  setTimeout(() => document.addEventListener('click', closeOnClickOutside), 0);
+}
+
+/**
  * Loads the popup UI content into the provided popup element.
  * 
  * This function fetches the external `popup_content.html` file, populates it with dynamic
@@ -941,9 +1264,10 @@ function loadPopupContent(popup, userRef, isDark) {
       const tabHighlight = document.createElement("div");
       tabHighlight.style.position = "absolute";
       tabHighlight.style.bottom = "0";
+      const TAB_COUNT = 5;
       tabHighlight.style.left = "0";
       tabHighlight.style.height = "32px";
-      tabHighlight.style.width = "25%";
+      tabHighlight.style.width = `${100 / TAB_COUNT}%`;
       tabHighlight.style.backgroundColor = "#ffa1161f";
       tabHighlight.style.borderRadius = "8px";
       tabHighlight.style.transition = "left 0.3s ease";
@@ -1006,7 +1330,8 @@ function loadPopupContent(popup, userRef, isDark) {
           "#friends-container",
           "#leaderboard-container",
           "#my-friends-container",
-          "#friend-requests-container"
+          "#friend-requests-container",
+          "#challenges-container"
         ];
         views.forEach(selector => {
           const container = popup.querySelector(selector);
@@ -1016,6 +1341,7 @@ function loadPopupContent(popup, userRef, isDark) {
         });
         loadFriendsData(userRef.username, true);
         fetchFriendRequests(userRef.username);
+        fetchPendingChallenges(userRef.username);
         const navbar = popup.querySelector("#friends-navbar");
         if (navbar) navbar.style.display = "flex";
       };
@@ -1036,6 +1362,10 @@ function loadPopupContent(popup, userRef, isDark) {
         {
           button: wrapper.querySelector("#friend-requests-tab"),
           view: wrapper.querySelector("#friend-requests-view")
+        },
+        {
+          button: wrapper.querySelector("#challenges-tab"),
+          view: wrapper.querySelector("#challenges-view")
         }
       ];
 
@@ -1047,7 +1377,7 @@ function loadPopupContent(popup, userRef, isDark) {
           button.style.backgroundColor = isActive ? "transparent" : (darkModeActive ? "#1e1e1e" : "#ffffff");
           button.style.color = isActive ? "#ffa116" : (darkModeActive ? "#e0e0e0" : "#333");
           view.style.display = isActive ? "block" : "none";
-          if (isActive) tabHighlight.style.left = `${index * 25}%`;
+          if (isActive) tabHighlight.style.left = `${index * (100 / TAB_COUNT)}%`;
         });
       }
 
@@ -1120,6 +1450,10 @@ async function addFriendsButton() {
     if (event.data?.type === "LEETCODE_USERNAME") {
       userRef.username = event.data.username;
 
+      if (window.LCFMatch) {
+        window.LCFMatch.setIncomingChallengeHandler(showIncomingChallengeToast);
+      }
+
       const selectorMap = [
         {
           pattern: "https://leetcode.com/problems/",
@@ -1189,6 +1523,7 @@ async function addFriendsButton() {
                       if (navbar) navbar.style.display = "flex";
                       loadFriendsData(userRef.username);
                       fetchFriendRequests(userRef.username);
+                      fetchPendingChallenges(userRef.username);
                     });
                   }
                 });
@@ -1201,6 +1536,7 @@ async function addFriendsButton() {
             const navbar = popup.querySelector("#friends-navbar");
             if (navbar) navbar.style.display = "flex";
             fetchFriendRequests(userRef.username);
+            fetchPendingChallenges(userRef.username);
           }
         })
         .catch(err => showToastMessage(err, "error"));
