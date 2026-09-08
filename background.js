@@ -11,7 +11,7 @@
 
 importScripts("socket.io.min.js");
 
-const BASE_URL = "https://d1x2mfntd2shiz.cloudfront.net";
+const BASE_URL = "https://leetcode-friends.duckdns.org";
 const HEARTBEAT_INTERVAL_MS = 20000;
 
 let socket = null;

@@ -1,4 +1,4 @@
-const BASE_URL = "https://d1x2mfntd2shiz.cloudfront.net";
+const BASE_URL = "https://leetcode-friends.duckdns.org";
 
 
 /**
