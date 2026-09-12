@@ -1,4 +1,5 @@
 const BASE_URL = "https://leetcode-friends.duckdns.org";
+const POPUP_VIEWPORT_GAP = 12;
 
 
 /**
@@ -1408,6 +1409,21 @@ function loadPopupContent(popup, userRef, isDark) {
 }
 
 /**
+ * Anchors the Friends popup to its button without letting the popup expand the
+ * page's scrollable area.
+ * @param {HTMLElement} popup - The popup container.
+ * @param {HTMLElement} friendsButton - The navbar button that opens the popup.
+ */
+function positionPopup(popup, friendsButton) {
+  const buttonRect = friendsButton.getBoundingClientRect();
+  const top = buttonRect.bottom + POPUP_VIEWPORT_GAP;
+
+  popup.style.top = `${top}px`;
+  popup.style.right = '3px';
+  popup.style.maxHeight = `${Math.max(0, window.innerHeight - top - POPUP_VIEWPORT_GAP)}px`;
+}
+
+/**
  * Conditionally adds the Friends button to the navbar and initializes the popup UI.
  */
 async function addFriendsButton() {
@@ -1416,7 +1432,7 @@ async function addFriendsButton() {
   const isDark = isDarkMode();
   const currentUrl = window.location.href;
 
-  let friendsButton = document.createElement("a");
+  const friendsButton = document.createElement("a");
   friendsButton.className = "group relative flex h-8 items-center justify-center rounded p-1 hover:bg-fill-3 dark:hover:bg-dark-fill-3 cursor-pointer";
   friendsButton.innerHTML = `
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22" class="text-text-secondary dark:text-text-secondary hover:text-text-primary dark:hover:text-text-primary">
@@ -1427,11 +1443,12 @@ async function addFriendsButton() {
   friendsButton.id = "friends-button";
 
   const popup = document.createElement("div");
-  // Set popup styling with opacity transition for smooth fade in/out (position will be set dynamically)
-  popup.className = "absolute text-text-secondary dark:text-dark-text-secondary rounded shadow-2xl p-2 pt-3 text-sm transition-opacity duration-200";
-  popup.style.position = "absolute";
+  // Keep the popup out of the document's scrollable overflow.
+  popup.className = "text-text-secondary dark:text-dark-text-secondary rounded shadow-2xl p-2 pt-3 text-sm transition-opacity duration-200";
+  popup.style.position = "fixed";
   popup.style.opacity = "0";
   popup.style.pointerEvents = "none";
+  popup.style.overflowY = "auto";
   popup.style.zIndex = "9999";
   popup.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.4)";
   popup.style.backgroundColor = isDark ? "#1e1e1e" : "#ffffff";
@@ -1554,11 +1571,8 @@ async function addFriendsButton() {
       popup.style.pointerEvents = "none";
       friendsButton.classList.remove("bg-fill-3", "dark:bg-dark-fill-3");
     } else {
-      const rect = friendsButton.getBoundingClientRect();
-      popup.style.top = (rect.bottom + window.scrollY + 12) + 'px';
-      popup.style.right = '3px';
+      positionPopup(popup, friendsButton);
       popup.style.height = 'auto';
-      popup.style.maxHeight = (window.innerHeight - 47) + 'px';
       const minWidth = 360;
       const maxWidth = 640;
       const clampedWidth = Math.max(minWidth, maxWidth);
@@ -1589,6 +1603,10 @@ async function addFriendsButton() {
       };
       document.addEventListener("keydown", closeOnEsc);
     }
+  });
+
+  window.addEventListener("resize", () => {
+    if (popup.style.opacity === "1") positionPopup(popup, friendsButton);
   });
 }
 
