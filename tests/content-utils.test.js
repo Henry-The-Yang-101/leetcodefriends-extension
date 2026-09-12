@@ -9,6 +9,7 @@ function loadContentScript() {
     chrome: {},
     console,
     document: {
+      createElement: () => ({ style: {} }),
       documentElement: { classList: { contains: () => false } }
     },
     fetch: () => {},
@@ -55,4 +56,14 @@ test('positionPopup keeps the popup inside the viewport', () => {
   assert.equal(result.top, '52px');
   assert.equal(result.right, '3px');
   assert.equal(result.maxHeight, '736px');
+});
+
+test('createFriendsPopup cannot contribute to document overflow', () => {
+  const context = loadContentScript();
+  const popup = vm.runInContext('createFriendsPopup(false)', context);
+
+  assert.equal(popup.style.position, 'fixed');
+  assert.equal(popup.style.overflowY, 'auto');
+  assert.equal(popup.style.width, '640px');
+  assert.equal(popup.style.backgroundColor, '#ffffff');
 });

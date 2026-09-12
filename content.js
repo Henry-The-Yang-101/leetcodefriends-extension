@@ -1199,6 +1199,187 @@ function openChallengeModal(opponentUsername, anchorEl) {
 }
 
 /**
+ * Returns the popup navbar, rebuilding its wrapper only if the template does
+ * not contain one.
+ * @param {HTMLElement} wrapper - Parsed popup template wrapper.
+ * @returns {HTMLElement}
+ */
+function ensurePopupNavbar(wrapper) {
+  let navbar = wrapper.querySelector("#friends-navbar");
+  if (navbar) return navbar;
+
+  navbar = document.createElement("div");
+  navbar.id = "friends-navbar";
+  navbar.style.display = "none";
+  navbar.style.justifyContent = "center";
+  navbar.style.marginBottom = "8px";
+  navbar.style.border = "1px solid #ddd";
+  navbar.style.borderRadius = "8px";
+  navbar.style.overflow = "hidden";
+  navbar.style.flex = "2";
+
+  let flexContainer = wrapper.querySelector("div[style*='display: flex'][style*='justify-content: center']");
+  if (!flexContainer) {
+    flexContainer = document.createElement("div");
+    flexContainer.style.display = "flex";
+    flexContainer.style.justifyContent = "center";
+    const header = wrapper.querySelector("div[style*='display: flex'][style*='space-between']");
+    if (header) {
+      header.insertAdjacentElement("afterend", flexContainer);
+    } else {
+      wrapper.appendChild(flexContainer);
+    }
+  }
+  flexContainer.appendChild(navbar);
+  return navbar;
+}
+
+/**
+ * Wires the friend-request form in the popup template.
+ * @param {HTMLElement} wrapper - Parsed popup template wrapper.
+ * @param {{username: string|null}} userRef - Mutable signed-in user reference.
+ */
+function setupFriendRequestForm(wrapper, userRef) {
+  const input = wrapper.querySelector("#send-friend-request-input");
+  const button = wrapper.querySelector("#send-friend-request-button");
+
+  function sendRequest() {
+    const receiverUsername = input.value.trim();
+    if (!receiverUsername) return;
+
+    fetch(`${BASE_URL}/friend-request/send`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sender_username: userRef.username,
+        receiver_username: receiverUsername
+      })
+    })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Unknown error occurred");
+        return data;
+      })
+      .then(() => {
+        input.value = "";
+        fetchFriendRequests(userRef.username);
+        showToastMessage("Friend request sent!", "success");
+      })
+      .catch((error) => showToastMessage(error.message, "error"));
+  }
+
+  button.style.transition = 'background-color 0.2s ease';
+  button.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+  button.addEventListener('mouseenter', () => {
+    button.style.backgroundColor = '#e69500';
+  });
+  button.addEventListener('mouseleave', () => {
+    button.style.backgroundColor = '#ffa116';
+  });
+  button.addEventListener("click", sendRequest);
+  input.addEventListener("keypress", (event) => {
+    if (event.key === "Enter") sendRequest();
+  });
+}
+
+/**
+ * Wires the popup reload action.
+ * @param {HTMLElement} popup - Friends popup container.
+ * @param {{username: string|null}} userRef - Mutable signed-in user reference.
+ * @param {boolean} isDark - Initial theme state.
+ */
+function setupReloadButton(popup, userRef, isDark) {
+  const button = popup.querySelector("#reload-button");
+  button.style.transition = 'color 0.2s ease, background-color 0.2s ease';
+  button.addEventListener("mouseenter", () => {
+    button.style.color = "#ffa116";
+  });
+  button.addEventListener("mouseleave", () => {
+    button.style.color = isDark ? "#e0e0e0" : "#333";
+  });
+  button.onclick = () => {
+    showToastMessage("Reloading data!");
+    [
+      "#friends-container",
+      "#leaderboard-container",
+      "#my-friends-container",
+      "#friend-requests-container",
+      "#challenges-container"
+    ].forEach(selector => {
+      const container = popup.querySelector(selector);
+      if (container) {
+        container.innerHTML = '<div class="loading-indicator">Loading...</div>';
+      }
+    });
+    loadPopupData(popup, userRef.username, true);
+  };
+}
+
+/**
+ * Wires tab selection, hover colors, and the animated active-tab highlight.
+ * @param {HTMLElement} wrapper - Parsed popup template wrapper.
+ */
+function setupPopupTabs(wrapper) {
+  const tabMapping = [
+    ["#friend-activity-tab", "#friend-activity-view"],
+    ["#leaderboard-tab", "#leaderboard-view"],
+    ["#my-friends-tab", "#my-friends-view"],
+    ["#friend-requests-tab", "#friend-requests-view"],
+    ["#challenges-tab", "#challenges-view"]
+  ].map(([buttonSelector, viewSelector]) => ({
+    button: wrapper.querySelector(buttonSelector),
+    view: wrapper.querySelector(viewSelector)
+  }));
+  const tabCount = tabMapping.length;
+  const tabBar = wrapper.querySelector("div[style*='display: flex'][style*='justify-content: center'] > div");
+  tabBar.style.position = "relative";
+  tabBar.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.2)";
+  tabBar.style.borderRadius = "8px";
+  tabBar.style.overflow = "hidden";
+
+  const highlight = document.createElement("div");
+  highlight.style.position = "absolute";
+  highlight.style.bottom = "0";
+  highlight.style.left = "0";
+  highlight.style.height = "32px";
+  highlight.style.width = `${100 / tabCount}%`;
+  highlight.style.backgroundColor = "#ffa1161f";
+  highlight.style.borderRadius = "8px";
+  highlight.style.transition = "left 0.3s ease";
+  tabBar.insertBefore(highlight, tabBar.firstChild);
+
+  function updateActiveTab(activeButton) {
+    const darkModeActive = isDarkMode();
+    tabMapping.forEach(({ button, view }, index) => {
+      const isActive = button === activeButton;
+      button.classList.toggle("active-tab", isActive);
+      button.style.backgroundColor = isActive ? "transparent" : (darkModeActive ? "#1e1e1e" : "#ffffff");
+      button.style.color = isActive ? "#ffa116" : (darkModeActive ? "#e0e0e0" : "#333");
+      view.style.display = isActive ? "block" : "none";
+      if (isActive) highlight.style.left = `${index * (100 / tabCount)}%`;
+    });
+  }
+
+  tabMapping.forEach(({ button }) => {
+    button.style.transition = 'background-color 0.2s ease, color 0.2s ease';
+    button.style.borderRadius = '8px';
+    button.addEventListener("click", () => updateActiveTab(button));
+    button.addEventListener("mouseenter", () => {
+      if (!button.classList.contains("active-tab")) {
+        button.style.backgroundColor = isDarkMode() ? "#333" : "#f5f5f5";
+      }
+    });
+    button.addEventListener("mouseleave", () => {
+      if (!button.classList.contains("active-tab")) {
+        button.style.backgroundColor = isDarkMode() ? "#1e1e1e" : "#ffffff";
+      }
+    });
+  });
+
+  updateActiveTab(tabMapping[0].button);
+}
+
+/**
  * Loads the popup UI content into the provided popup element.
  * 
  * This function fetches the external `popup_content.html` file, populates it with dynamic
@@ -1216,181 +1397,11 @@ function loadPopupContent(popup, userRef, isDark) {
     .then(html => {
       const wrapper = document.createElement("div");
       wrapper.innerHTML = html;
-
-      // Ensure a navbar exists in the loaded content.
-      let navbar = wrapper.querySelector("#friends-navbar");
-      if (!navbar) {
-        navbar = document.createElement("div");
-        navbar.id = "friends-navbar";
-        // Apply the HTML's navbar styling.
-        navbar.style.display = "none"; // default hidden; will show later
-        navbar.style.justifyContent = "center";
-        navbar.style.marginBottom = "8px";
-        navbar.style.border = "1px solid #ddd";
-        navbar.style.borderRadius = "8px";
-        navbar.style.overflow = "hidden";
-        navbar.style.flex = "2";
-
-        // Look for an existing flex container with centered content.
-        let flexContainer = wrapper.querySelector("div[style*='display: flex'][style*='justify-content: center']");
-        if (!flexContainer) {
-          // If not found, create one.
-          flexContainer = document.createElement("div");
-          flexContainer.style.display = "flex";
-          flexContainer.style.justifyContent = "center";
-          // Insert the new flex container right after the header block.
-          const header = wrapper.querySelector("div[style*='display: flex'][style*='space-between']");
-          if (header) {
-            header.insertAdjacentElement("afterend", flexContainer);
-          } else {
-            wrapper.appendChild(flexContainer);
-          }
-        }
-        // Append the navbar into the flex container.
-        flexContainer.appendChild(navbar);
-      }
-
-      const tabBar = wrapper.querySelector("div[style*='display: flex'][style*='justify-content: center'] > div");
-      tabBar.style.position = "relative";
-      tabBar.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.2)";
-      tabBar.style.borderRadius = "8px";
-      tabBar.style.overflow = "hidden";
-
-      const tabHighlight = document.createElement("div");
-      tabHighlight.style.position = "absolute";
-      tabHighlight.style.bottom = "0";
-      const TAB_COUNT = 5;
-      tabHighlight.style.left = "0";
-      tabHighlight.style.height = "32px";
-      tabHighlight.style.width = `${100 / TAB_COUNT}%`;
-      tabHighlight.style.backgroundColor = "#ffa1161f";
-      tabHighlight.style.borderRadius = "8px";
-      tabHighlight.style.transition = "left 0.3s ease";
-      tabBar.insertBefore(tabHighlight, tabBar.firstChild);
-
-      const sendRequestInput = wrapper.querySelector("#send-friend-request-input");
-      const sendRequestButton = wrapper.querySelector("#send-friend-request-button");
-
-      function sendRequest() {
-        const receiverUsername = sendRequestInput.value.trim();
-        if (!receiverUsername) return;
-
-        fetch(`${BASE_URL}/friend-request/send`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            sender_username: userRef.username,
-            receiver_username: receiverUsername
-          })
-        })
-          .then(async (res) => {
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Unknown error occurred");
-            return data;
-          })
-          .then(() => {
-            sendRequestInput.value = "";
-            fetchFriendRequests(userRef.username);
-            showToastMessage(`Friend request sent!`, "success");
-          })
-          .catch((error) => showToastMessage(error.message, "error"));
-      }
-
-      sendRequestButton.style.transition = 'background-color 0.2s ease';
-      sendRequestButton.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
-      sendRequestButton.addEventListener('mouseenter', () => {
-        sendRequestButton.style.backgroundColor = '#e69500';
-      });
-      sendRequestButton.addEventListener('mouseleave', () => {
-        sendRequestButton.style.backgroundColor = '#ffa116';
-      });
-      sendRequestButton.addEventListener("click", sendRequest);
-      sendRequestInput.addEventListener("keypress", (event) => {
-        if (event.key === "Enter") sendRequest();
-      });
-
+      ensurePopupNavbar(wrapper);
+      setupFriendRequestForm(wrapper, userRef);
       popup.appendChild(wrapper);
-
-      const reloadButton = popup.querySelector("#reload-button");
-      reloadButton.style.transition = 'color 0.2s ease, background-color 0.2s ease';
-      reloadButton.addEventListener("mouseenter", () => {
-        reloadButton.style.color = "#ffa116";
-      });
-      reloadButton.addEventListener("mouseleave", () => {
-        reloadButton.style.color = isDark ? "#e0e0e0" : "#333";
-      });
-      reloadButton.onclick = () => {
-        showToastMessage("Reloading data!");
-        const views = [
-          "#friends-container",
-          "#leaderboard-container",
-          "#my-friends-container",
-          "#friend-requests-container",
-          "#challenges-container"
-        ];
-        views.forEach(selector => {
-          const container = popup.querySelector(selector);
-          if (container) {
-            container.innerHTML = '<div class="loading-indicator">Loading...</div>';
-          }
-        });
-        loadPopupData(popup, userRef.username, true);
-      };
-
-      const tabMapping = [
-        {
-          button: wrapper.querySelector("#friend-activity-tab"),
-          view: wrapper.querySelector("#friend-activity-view")
-        },
-        {
-          button: wrapper.querySelector("#leaderboard-tab"),
-          view: wrapper.querySelector("#leaderboard-view")
-        },
-        {
-          button: wrapper.querySelector("#my-friends-tab"),
-          view: wrapper.querySelector("#my-friends-view")
-        },
-        {
-          button: wrapper.querySelector("#friend-requests-tab"),
-          view: wrapper.querySelector("#friend-requests-view")
-        },
-        {
-          button: wrapper.querySelector("#challenges-tab"),
-          view: wrapper.querySelector("#challenges-view")
-        }
-      ];
-
-      function updateActiveTab(activeButton) {
-        const darkModeActive = isDarkMode();
-        tabMapping.forEach(({ button, view }, index) => {
-          const isActive = button === activeButton;
-          button.classList.toggle("active-tab", isActive);
-          button.style.backgroundColor = isActive ? "transparent" : (darkModeActive ? "#1e1e1e" : "#ffffff");
-          button.style.color = isActive ? "#ffa116" : (darkModeActive ? "#e0e0e0" : "#333");
-          view.style.display = isActive ? "block" : "none";
-          if (isActive) tabHighlight.style.left = `${index * (100 / TAB_COUNT)}%`;
-        });
-      }
-
-      tabMapping.forEach(({ button }) => {
-        button.style.transition = 'background-color 0.2s ease, color 0.2s ease';
-        button.style.borderRadius = '8px';
-        button.addEventListener("click", () => updateActiveTab(button));
-        button.addEventListener("mouseenter", () => {
-          if (!button.classList.contains("active-tab")) {
-            const darkModeActive = isDarkMode();
-            button.style.backgroundColor = darkModeActive ? "#333" : "#f5f5f5";
-          }
-        });
-        button.addEventListener("mouseleave", () => {
-          if (!button.classList.contains("active-tab")) {
-            const darkModeActive = isDarkMode();
-            button.style.backgroundColor = darkModeActive ? "#1e1e1e" : "#ffffff";
-          }
-        });
-      });
-
-      updateActiveTab(tabMapping[0].button);
+      setupReloadButton(popup, userRef, isDark);
+      setupPopupTabs(wrapper);
       return wrapper;
     })
     .catch(error => {
