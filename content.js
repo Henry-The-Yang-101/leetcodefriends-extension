@@ -1,5 +1,6 @@
 const BASE_URL = "https://leetcode-friends.duckdns.org";
 const POPUP_VIEWPORT_GAP = 12;
+const POPUP_WIDTH = 640;
 const EMPTY_FRIENDS_TITLE = 'You currently have no friends... :C';
 const EMPTY_FRIENDS_HINT = 'Go make some friends in the friend requests tab! 👉👉👉';
 
@@ -1333,11 +1334,7 @@ function loadPopupContent(popup, userRef, isDark) {
             container.innerHTML = '<div class="loading-indicator">Loading...</div>';
           }
         });
-        loadFriendsData(userRef.username, true);
-        fetchFriendRequests(userRef.username);
-        fetchPendingChallenges(userRef.username);
-        const navbar = popup.querySelector("#friends-navbar");
-        if (navbar) navbar.style.display = "flex";
+        loadPopupData(popup, userRef.username, true);
       };
 
       const tabMapping = [
@@ -1417,6 +1414,157 @@ function positionPopup(popup, friendsButton) {
 }
 
 /**
+ * Creates the Friends navbar button.
+ * @returns {HTMLAnchorElement}
+ */
+function createFriendsButton() {
+  const button = document.createElement("a");
+  button.className = "group relative flex h-8 items-center justify-center rounded p-1 hover:bg-fill-3 dark:hover:bg-dark-fill-3 cursor-pointer";
+  button.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22" class="text-text-secondary dark:text-text-secondary hover:text-text-primary dark:hover:text-text-primary">
+      <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5s-3 1.34-3 3 1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 2.01 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+    </svg>
+  `;
+  button.title = "Friends";
+  button.id = "friends-button";
+  return button;
+}
+
+/**
+ * Creates the floating Friends panel shell.
+ * @param {boolean} isDark - Whether dark mode was active during initialization.
+ * @returns {HTMLDivElement}
+ */
+function createFriendsPopup(isDark) {
+  const popup = document.createElement("div");
+  popup.className = "text-text-secondary dark:text-dark-text-secondary rounded shadow-2xl p-2 pt-3 text-sm transition-opacity duration-200";
+  popup.style.position = "fixed";
+  popup.style.opacity = "0";
+  popup.style.pointerEvents = "none";
+  popup.style.overflowY = "auto";
+  popup.style.zIndex = "9999";
+  popup.style.width = `${POPUP_WIDTH}px`;
+  popup.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.4)";
+  popup.style.backgroundColor = isDark ? "#1e1e1e" : "#ffffff";
+  return popup;
+}
+
+/**
+ * Injects the page-context helper that reads the signed-in LeetCode username.
+ */
+function requestLeetCodeUsername() {
+  const script = document.createElement("script");
+  script.src = chrome.runtime.getURL("username_obtainer.js");
+  script.onload = () => script.remove();
+  (document.head || document.documentElement).appendChild(script);
+}
+
+/**
+ * Inserts the Friends button in the navbar appropriate for the current page.
+ * @param {HTMLElement} friendsButton - The button to insert.
+ * @param {string} currentUrl - Current LeetCode URL.
+ * @returns {Promise<boolean>} Whether a matching navbar was found.
+ */
+async function insertFriendsButton(friendsButton, currentUrl) {
+  const targets = [
+    {
+      pattern: "https://leetcode.com/problems/",
+      selector: "div.relative.flex.items-center.justify-end.gap-2",
+      insertIndex: 4
+    },
+    {
+      pattern: "https://leetcode.com",
+      selector: "nav#leetcode-navbar .relative.flex.items-center.space-x-2",
+      insertIndex: 2
+    }
+  ];
+  const target = targets.find(({ pattern }) => currentUrl.startsWith(pattern));
+  if (!target) return false;
+
+  const container = await waitForElement(target.selector);
+  container.insertBefore(friendsButton, container.children[target.insertIndex]);
+  return true;
+}
+
+/**
+ * Refreshes every popup view while preserving their existing render behavior.
+ * @param {HTMLElement} popup - Friends popup container.
+ * @param {string} username - Signed-in LeetCode username.
+ * @param {boolean} [fresh] - Whether server-side caches should be bypassed.
+ */
+function loadPopupData(popup, username, fresh = false) {
+  loadFriendsData(username, fresh);
+  fetchFriendRequests(username);
+  fetchPendingChallenges(username);
+  const navbar = popup.querySelector("#friends-navbar");
+  if (navbar) navbar.style.display = "flex";
+}
+
+/**
+ * Replaces the activity view with the first-time registration action.
+ * @param {HTMLElement} popup - Friends popup container.
+ * @param {{username: string}} userRef - Mutable signed-in user reference.
+ * @param {boolean} isDark - Initial theme state.
+ */
+function renderRegistrationPrompt(popup, userRef, isDark) {
+  const popupContent = popup.querySelector("#friend-activity-view");
+  popupContent.innerHTML = "";
+
+  const registerButton = document.createElement("button");
+  registerButton.textContent = `Register as ${userRef.username}!`;
+  registerButton.style.margin = "16px auto";
+  registerButton.style.display = "block";
+  registerButton.style.padding = "10px 20px";
+  registerButton.style.backgroundColor = "#ffa116";
+  registerButton.style.color = "white";
+  registerButton.style.border = "none";
+  registerButton.style.borderRadius = "8px";
+  registerButton.style.fontFamily = '"Roboto Mono", monospace';
+  registerButton.style.cursor = "pointer";
+
+  registerButton.onclick = () => {
+    fetch(`${BASE_URL}/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: userRef.username })
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message?.includes("registered")) {
+          popup.innerHTML = "";
+          loadPopupContent(popup, { username: userRef.username }, isDark)
+            .then(() => loadPopupData(popup, userRef.username));
+        }
+      });
+  };
+
+  popupContent.appendChild(registerButton);
+}
+
+/**
+ * Loads registration state and initializes the appropriate popup content.
+ * @param {HTMLElement} popup - Friends popup container.
+ * @param {{username: string}} userRef - Mutable signed-in user reference.
+ * @param {boolean} isDark - Initial theme state.
+ */
+function loadRegistrationState(popup, userRef, isDark) {
+  fetch(`${BASE_URL}/user-is-registered?username=${userRef.username}`)
+    .then(async (response) => {
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unknown error occurred");
+      return data;
+    })
+    .then(data => {
+      if (data.is_registered) {
+        loadPopupData(popup, userRef.username);
+      } else {
+        renderRegistrationPrompt(popup, userRef, isDark);
+      }
+    })
+    .catch(error => showToastMessage(error, "error"));
+}
+
+/**
  * Conditionally adds the Friends button to the navbar and initializes the popup UI.
  */
 async function addFriendsButton() {
@@ -1424,135 +1572,27 @@ async function addFriendsButton() {
   if (document.getElementById('friends-button')) return;
   const isDark = isDarkMode();
   const currentUrl = window.location.href;
-
-  const friendsButton = document.createElement("a");
-  friendsButton.className = "group relative flex h-8 items-center justify-center rounded p-1 hover:bg-fill-3 dark:hover:bg-dark-fill-3 cursor-pointer";
-  friendsButton.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22" class="text-text-secondary dark:text-text-secondary hover:text-text-primary dark:hover:text-text-primary">
-        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5s-3 1.34-3 3 1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 2.01 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-      </svg>
-    `;
-  friendsButton.title = "Friends";
-  friendsButton.id = "friends-button";
-
-  const popup = document.createElement("div");
-  // Keep the popup out of the document's scrollable overflow.
-  popup.className = "text-text-secondary dark:text-dark-text-secondary rounded shadow-2xl p-2 pt-3 text-sm transition-opacity duration-200";
-  popup.style.position = "fixed";
-  popup.style.opacity = "0";
-  popup.style.pointerEvents = "none";
-  popup.style.overflowY = "auto";
-  popup.style.zIndex = "9999";
-  popup.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.4)";
-  popup.style.backgroundColor = isDark ? "#1e1e1e" : "#ffffff";
+  const friendsButton = createFriendsButton();
+  const popup = createFriendsPopup(isDark);
 
   const userRef = { username: null };
 
   loadPopupContent(popup, userRef, isDark);
-
-  const obtainer_script = document.createElement("script");
-  obtainer_script.src = chrome.runtime.getURL("username_obtainer.js");
-  obtainer_script.onload = () => obtainer_script.remove();
-  (document.head || document.documentElement).appendChild(obtainer_script);
+  requestLeetCodeUsername();
 
   window.addEventListener("message", async (event) => {
-    if (event.source !== window) return;
-    if (event.data?.type === "LEETCODE_USERNAME") {
-      userRef.username = event.data.username;
+    if (event.source !== window || event.data?.type !== "LEETCODE_USERNAME") return;
 
-      if (window.LCFMatch) {
-        window.LCFMatch.setIncomingChallengeHandler(showIncomingChallengeToast);
-      }
-
-      const selectorMap = [
-        {
-          pattern: "https://leetcode.com/problems/",
-          selector: "div.relative.flex.items-center.justify-end.gap-2",
-          insertIndex: 4
-        },
-        {
-          pattern: "https://leetcode.com",
-          selector: "nav#leetcode-navbar .relative.flex.items-center.space-x-2",
-          insertIndex: 2
-        }
-      ];
-
-      let container;
-      let insertIndex = 0;
-
-      for (const { pattern, selector, insertIndex: index } of selectorMap) {
-        if (currentUrl.startsWith(pattern)) {
-          container = await waitForElement(selector);
-          insertIndex = index;
-          break;
-        }
-      }
-      if (container) {
-        container.insertBefore(friendsButton, container.children[insertIndex]);
-      } else {
-        console.warn("Navbar container not found!");
-        return;
-      }
-
-      fetch(`${BASE_URL}/user-is-registered?username=${userRef.username}`)
-        .then(async (res) => {
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || "Unknown error occurred");
-          return data;
-        })
-        .then(data => {
-          if (!data.is_registered) {
-            const popupContent = popup.querySelector("#friend-activity-view");
-            popupContent.innerHTML = "";
-
-            const registerButton = document.createElement("button");
-            registerButton.textContent = `Register as ${userRef.username}!`;
-            registerButton.style.margin = "16px auto";
-            registerButton.style.display = "block";
-            registerButton.style.padding = "10px 20px";
-            registerButton.style.backgroundColor = "#ffa116";
-            registerButton.style.color = "white";
-            registerButton.style.border = "none";
-            registerButton.style.borderRadius = "8px";
-            registerButton.style.fontFamily = '"Roboto Mono", monospace';
-            registerButton.style.cursor = "pointer";
-
-            registerButton.onclick = () => {
-              fetch(`${BASE_URL}/register`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: userRef.username })
-              })
-                .then(res => res.json())
-                .then(data => {
-                  if (data.message?.includes("registered")) {
-                    popup.innerHTML = "";
-                    loadPopupContent(popup, { username: userRef.username }, isDark).then(() => {
-
-                      const navbar = popup.querySelector("#friends-navbar");
-                      if (navbar) navbar.style.display = "flex";
-                      loadFriendsData(userRef.username);
-                      fetchFriendRequests(userRef.username);
-                      fetchPendingChallenges(userRef.username);
-                    });
-                  }
-                });
-            };
-
-            popupContent.appendChild(registerButton);
-          } else {
-            // registered
-            loadFriendsData(userRef.username);
-            const navbar = popup.querySelector("#friends-navbar");
-            if (navbar) navbar.style.display = "flex";
-            fetchFriendRequests(userRef.username);
-            fetchPendingChallenges(userRef.username);
-          }
-        })
-        .catch(err => showToastMessage(err, "error"));
-
-      // Setup event listener for send request button regardless of registration state
+    userRef.username = event.data.username;
+    if (window.LCFMatch) {
+      window.LCFMatch.setIncomingChallengeHandler(showIncomingChallengeToast);
     }
+
+    if (!await insertFriendsButton(friendsButton, currentUrl)) {
+      console.warn("Navbar container not found!");
+      return;
+    }
+    loadRegistrationState(popup, userRef, isDark);
   });
 
   document.body.appendChild(popup);
@@ -1566,10 +1606,6 @@ async function addFriendsButton() {
     } else {
       positionPopup(popup, friendsButton);
       popup.style.height = 'auto';
-      const minWidth = 360;
-      const maxWidth = 640;
-      const clampedWidth = Math.max(minWidth, maxWidth);
-      popup.style.width = clampedWidth + 'px';
       popup.style.opacity = "1";
       popup.style.pointerEvents = "auto";
       friendsButton.classList.add("bg-fill-3", "dark:bg-dark-fill-3");
