@@ -1,5 +1,7 @@
 const BASE_URL = "https://leetcode-friends.duckdns.org";
 const POPUP_VIEWPORT_GAP = 12;
+const EMPTY_FRIENDS_TITLE = 'You currently have no friends... :C';
+const EMPTY_FRIENDS_HINT = 'Go make some friends in the friend requests tab! 👉👉👉';
 
 
 /**
@@ -75,6 +77,50 @@ async function waitForElement(selector) {
 }
 
 /**
+ * Renders the shared empty state used by Friends views.
+ * @param {HTMLElement} container - The view that should receive the empty state.
+ */
+function renderEmptyFriendsState(container) {
+  const textColor = isDarkMode() ? '#e0e0e0' : '#000';
+  const fallback = document.createElement('div');
+  fallback.className = 'loading-indicator';
+  fallback.style.padding = '64px 0';
+  fallback.style.color = textColor;
+  fallback.style.fontSize = '16px';
+  fallback.textContent = EMPTY_FRIENDS_TITLE;
+
+  const hint = document.createElement('span');
+  hint.style.fontSize = '13px';
+  hint.style.color = textColor;
+  hint.textContent = EMPTY_FRIENDS_HINT;
+
+  fallback.appendChild(document.createElement('br'));
+  fallback.appendChild(hint);
+  container.appendChild(fallback);
+}
+
+/**
+ * Formats a Unix timestamp using the compact relative-time labels shown in
+ * the activity feed.
+ * @param {number} timestamp - Unix timestamp in seconds.
+ * @param {Date} [now] - Current time, injectable for deterministic tests.
+ * @returns {string}
+ */
+function formatTimeAgo(timestamp, now = new Date()) {
+  const diffInSeconds = Math.floor((now - new Date(timestamp * 1000)) / 1000);
+  if (diffInSeconds < 60) return 'just now';
+
+  const units = [
+    { seconds: 86400, label: 'day' },
+    { seconds: 3600, label: 'hour' },
+    { seconds: 60, label: 'minute' }
+  ];
+  const unit = units.find(({ seconds }) => diffInSeconds >= seconds);
+  const value = Math.floor(diffInSeconds / unit.seconds);
+  return `${value} ${unit.label}${value > 1 ? 's' : ''} ago`;
+}
+
+/**
  * Fetches current user and friends data, and triggers rendering of views.
  * @param {string} username - The current user's LeetCode username.
  * @param {boolean} fresh - If true, bypasses cache and fetches fresh data from LeetCode.
@@ -116,19 +162,7 @@ function renderFriendActivity(friendsData) {
 
   container.innerHTML = '';
   if (!friendsData || friendsData.length === 0) {
-    const fallback = document.createElement('div');
-    fallback.className = 'loading-indicator';
-    fallback.style.padding = '64px 0';
-    fallback.style.color = isDarkMode() ? '#e0e0e0' : '#000';
-    fallback.style.fontSize = '16px';
-    fallback.textContent = 'You currently have no friends... :C';
-    const span = document.createElement('span');
-    span.style.fontSize = '13px';
-    span.style.color = isDarkMode() ? '#e0e0e0' : '#000';
-    span.textContent = 'Go make some friends in the friend requests tab! 👉👉👉';
-    fallback.appendChild(document.createElement('br'));
-    fallback.appendChild(span);
-    container.appendChild(fallback);
+    renderEmptyFriendsState(container);
     return;
   }
 
@@ -196,27 +230,10 @@ function renderFriendActivity(friendsData) {
     profileLink.appendChild(username);
     headerDiv.appendChild(profileLink);
 
-    // Compute relative "time ago" string for this submission
-    const now = new Date();
-    const submissionDate = new Date(item.timestamp * 1000);
-    let diffInSeconds = Math.floor((now - submissionDate) / 1000);
-    let timeText = '';
-    if (diffInSeconds < 60) {
-      timeText = 'just now';
-    } else if (diffInSeconds < 3600) {
-      const minutes = Math.floor(diffInSeconds / 60);
-      timeText = minutes + ' minute' + (minutes > 1 ? 's' : '') + ' ago';
-    } else if (diffInSeconds < 86400) {
-      const hours = Math.floor(diffInSeconds / 3600);
-      timeText = hours + ' hour' + (hours > 1 ? 's' : '') + ' ago';
-    } else {
-      const days = Math.floor(diffInSeconds / 86400);
-      timeText = days + ' day' + (days > 1 ? 's' : '') + ' ago';
-    }
     const timeSpan = document.createElement('span');
     timeSpan.style.fontSize = '13px';
     timeSpan.style.color = isDarkMode() ? "#e0e0e0" : "#333";
-    timeSpan.textContent = timeText;
+    timeSpan.textContent = formatTimeAgo(item.timestamp);
     headerDiv.appendChild(timeSpan);
 
     card.appendChild(headerDiv);
@@ -259,19 +276,7 @@ function renderLeaderboard(currentUserData, friendsData) {
   leaderboardContainer.innerHTML = '';
 
   if (!friendsData || friendsData.length === 0) {
-    const fallback = document.createElement('div');
-    fallback.className = 'loading-indicator';
-    fallback.style.padding = '64px 0';
-    fallback.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains('dark') ? '#e0e0e0' : '#000';
-    fallback.style.fontSize = '16px';
-    fallback.textContent = 'You currently have no friends... :C';
-    const span = document.createElement('span');
-    span.style.fontSize = '13px';
-    span.style.color = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains('dark') ? '#e0e0e0' : '#000';
-    span.textContent = 'Go make some friends in the friend requests tab! 👉👉👉';
-    fallback.appendChild(document.createElement('br'));
-    fallback.appendChild(span);
-    leaderboardContainer.appendChild(fallback);
+    renderEmptyFriendsState(leaderboardContainer);
     return;
   }
 
@@ -520,19 +525,7 @@ function renderMyFriendsGrid(friendsData) {
   const myFriendsContainer = document.getElementById('my-friends-container');
   myFriendsContainer.innerHTML = '';
   if (!friendsData || friendsData.length === 0) {
-    const fallback = document.createElement('div');
-    fallback.className = 'loading-indicator';
-    fallback.style.padding = '64px 0';
-    fallback.style.color = isDarkMode() ? '#e0e0e0' : '#000';
-    fallback.style.fontSize = '16px';
-    fallback.textContent = 'You currently have no friends... :C';
-    const span = document.createElement('span');
-    span.style.fontSize = '13px';
-    span.style.color = document.documentElement.classList.contains("dark") ? '#e0e0e0' : '#000';
-    span.textContent = 'Go make some friends in the friend requests tab! 👉👉👉';
-    fallback.appendChild(document.createElement('br'));
-    fallback.appendChild(span);
-    myFriendsContainer.appendChild(fallback);
+    renderEmptyFriendsState(myFriendsContainer);
     return;
   }
 
