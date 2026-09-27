@@ -6,22 +6,6 @@ const EMPTY_FRIENDS_HINT = 'Go make some friends in the friend requests tab! ðŸ‘
 
 
 /**
- * Checks if the LeetCode homepage is forcing light mode.
- * @returns {boolean}
- */
-function isLeetCodeHomeForcingLightMode() {
-  return window.location.pathname === '/' && !document.documentElement.classList.contains('dark');
-}
-
-/**
- * Determines if dark mode is currently active on the page.
- * @returns {boolean}
- */
-function isDarkMode() {
-  return !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains("dark");
-}
-
-/**
  * Displays a temporary toast message at the top of the popup.
  * @param {string} message - The message to display.
  * @param {string} [type] - Optional type of the message: "success", "error", or "".
@@ -82,17 +66,16 @@ async function waitForElement(selector) {
  * @param {HTMLElement} container - The view that should receive the empty state.
  */
 function renderEmptyFriendsState(container) {
-  const textColor = isDarkMode() ? '#e0e0e0' : '#000';
   const fallback = document.createElement('div');
   fallback.className = 'loading-indicator';
   fallback.style.padding = '64px 0';
-  fallback.style.color = textColor;
+  fallback.style.color = 'var(--lcf-empty-text)';
   fallback.style.fontSize = '16px';
   fallback.textContent = EMPTY_FRIENDS_TITLE;
 
   const hint = document.createElement('span');
   hint.style.fontSize = '13px';
-  hint.style.color = textColor;
+  hint.style.color = 'var(--lcf-empty-text)';
   hint.textContent = EMPTY_FRIENDS_HINT;
 
   fallback.appendChild(document.createElement('br'));
@@ -194,9 +177,7 @@ function renderFriendActivity(friendsData) {
     card.style.borderRadius = '8px';
     card.style.padding = '8px';
     card.style.margin = '8px 4px';
-    card.style.background = isDarkMode()
-      ? (index % 2 === 0 ? "#2a2a2a" : "#1f1f1f")
-      : (index % 2 === 0 ? "#fff" : "#f0f0f0");
+    card.style.background = index % 2 === 0 ? 'var(--lcf-card-even)' : 'var(--lcf-card-odd)';
     card.style.fontFamily = '"Roboto Mono", monospace';
 
     // Create header div with avatar, username, and time ago
@@ -233,7 +214,7 @@ function renderFriendActivity(friendsData) {
 
     const timeSpan = document.createElement('span');
     timeSpan.style.fontSize = '13px';
-    timeSpan.style.color = isDarkMode() ? "#e0e0e0" : "#333";
+    timeSpan.style.color = 'var(--lcf-text)';
     timeSpan.textContent = formatTimeAgo(item.timestamp);
     headerDiv.appendChild(timeSpan);
 
@@ -245,7 +226,7 @@ function renderFriendActivity(friendsData) {
     submissionTitleLink.target = '_blank';
     submissionTitleLink.textContent = item.title;
     submissionTitleLink.style.fontSize = '13px';
-    submissionTitleLink.style.color = isDarkMode() ? "#e0e0e0" : "#333";
+    submissionTitleLink.style.color = 'var(--lcf-text)';
     submissionTitleLink.style.textAlign = 'left';
     submissionTitleLink.style.marginTop = '4px';
     submissionTitleLink.style.display = 'inline-block';
@@ -257,7 +238,7 @@ function renderFriendActivity(friendsData) {
     });
 
     submissionTitleLink.addEventListener('mouseleave', () => {
-      submissionTitleLink.style.color = document.documentElement.classList.contains("dark") ? "#e0e0e0" : "#333";
+      submissionTitleLink.style.color = 'var(--lcf-text)';
       submissionTitleLink.style.textDecoration = 'none';
     });
 
@@ -354,9 +335,8 @@ function renderLeaderboard(currentUserData, friendsData) {
   tabBar.style.marginBottom = '12px';
   tabBar.style.fontFamily = '"Roboto Mono", monospace';
 
-  const darkMode = !isLeetCodeHomeForcingLightMode() && document.documentElement.classList.contains('dark');
-  const inactiveBg = darkMode ? '#1e1e1e' : '#ffffff';
-  const inactiveText = darkMode ? '#e0e0e0' : '#333';
+  const inactiveBg = 'var(--lcf-panel-bg)';
+  const inactiveText = 'var(--lcf-text)';
 
   const weeklyTab = document.createElement('button');
   weeklyTab.textContent = 'Leaderboard This Week';
@@ -384,7 +364,7 @@ function renderLeaderboard(currentUserData, friendsData) {
   // Weekly tab hover
   weeklyTab.addEventListener('mouseenter', () => {
     if (!weeklyTab.classList.contains('active')) {
-      weeklyTab.style.backgroundColor = darkMode ? '#333' : '#f5f5f5';
+      weeklyTab.style.backgroundColor = 'var(--lcf-tab-hover-bg)';
     }
   });
   weeklyTab.addEventListener('mouseleave', () => {
@@ -396,7 +376,7 @@ function renderLeaderboard(currentUserData, friendsData) {
   // All Time tab hover
   allTimeTab.addEventListener('mouseenter', () => {
     if (!allTimeTab.classList.contains('active')) {
-      allTimeTab.style.backgroundColor = darkMode ? '#333' : '#f5f5f5';
+      allTimeTab.style.backgroundColor = 'var(--lcf-tab-hover-bg)';
     }
   });
   allTimeTab.addEventListener('mouseleave', () => {
@@ -430,9 +410,7 @@ function renderLeaderboard(currentUserData, friendsData) {
       row.style.padding = '8px';
       row.style.borderRadius = '6px';
       row.style.boxShadow = '0 0 4px rgba(0,0,0,0.1)';
-      row.style.background = document.documentElement.classList.contains('dark')
-        ? (user.isCurrentUser ? '#3a2a15' : '#2b2b2b')
-        : (user.isCurrentUser ? '#ffe8cc' : '#f8f8f8');
+      row.style.background = user.isCurrentUser ? 'var(--lcf-current-row-bg)' : 'var(--lcf-row-bg)';
 
       const rankElem = document.createElement('div');
       rankElem.textContent = `#${index + 1}`;
@@ -547,10 +525,9 @@ function renderMyFriendsGrid(friendsData) {
     card.style.flexDirection = 'column';
     card.style.alignItems = 'center';
     card.style.fontFamily = '"Roboto Mono", monospace';
-    card.style.backgroundColor = isDarkMode() ? "#2a2a2a" : "#ffffff";
     card.style.borderRadius = "8px";
     card.style.padding = "12px";
-    card.style.background = isDarkMode() ? "#1e1e1e" : "#f9f9f9";
+    card.style.background = 'var(--lcf-grid-card-bg)';
     card.style.width = '100%';
     card.style.boxSizing = 'border-box';
     // Removed hover effect from card
@@ -594,7 +571,7 @@ function renderMyFriendsGrid(friendsData) {
 
     const metadata = document.createElement('div');
     metadata.style.fontSize = '12px';
-    metadata.style.color = isDarkMode() ? "#e0e0e0" : "#333";
+    metadata.style.color = 'var(--lcf-text)';
     metadata.style.marginTop = '8px';
     metadata.style.textAlign = 'center';
     metadata.style.lineHeight = '1.5';
@@ -755,7 +732,7 @@ async function fetchFriendRequests(username) {
       card.style.marginLeft = '2px';
       card.style.marginRight = '2px';
       card.style.borderRadius = '8px';
-      card.style.backgroundColor = isDarkMode() ? "#2a2a2a" : "#ffffff";
+      card.style.backgroundColor = 'var(--lcf-request-card-bg)';
       card.style.fontFamily = '"Roboto Mono", monospace';
       card.style.boxShadow = '0 0 4px rgba(0, 0, 0, 0.2)';
 
@@ -964,13 +941,13 @@ function buildChallengeCard(challenge, username) {
   card.style.marginLeft = '2px';
   card.style.marginRight = '2px';
   card.style.borderRadius = '8px';
-  card.style.backgroundColor = isDarkMode() ? "#2a2a2a" : "#ffffff";
+  card.style.backgroundColor = 'var(--lcf-request-card-bg)';
   card.style.fontFamily = '"Roboto Mono", monospace';
   card.style.boxShadow = '0 0 4px rgba(0, 0, 0, 0.2)';
 
   const info = document.createElement('div');
   info.style.fontSize = '14px';
-  info.style.color = isDarkMode() ? "#e0e0e0" : "#333";
+  info.style.color = 'var(--lcf-text)';
 
   const challengerLink = document.createElement('a');
   challengerLink.href = `https://leetcode.com/u/${challenge.challenger_username}`;
@@ -1045,8 +1022,8 @@ function showIncomingChallengeToast(data) {
   toast.style.top = '16px';
   toast.style.right = '16px';
   toast.style.zIndex = '2147483647';
-  toast.style.backgroundColor = isDarkMode() ? "#1e1e1e" : "#ffffff";
-  toast.style.color = isDarkMode() ? "#e0e0e0" : "#333";
+  toast.style.backgroundColor = 'var(--lcf-panel-bg)';
+  toast.style.color = 'var(--lcf-text)';
   toast.style.padding = '16px';
   toast.style.borderRadius = '10px';
   toast.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.4)';
@@ -1121,8 +1098,8 @@ function openChallengeModal(opponentUsername, anchorEl) {
   modal.className = 'lcf-challenge-modal';
   modal.style.position = 'fixed';
   modal.style.zIndex = '2147483647';
-  modal.style.backgroundColor = isDarkMode() ? "#1e1e1e" : "#ffffff";
-  modal.style.color = isDarkMode() ? "#e0e0e0" : "#333";
+  modal.style.backgroundColor = 'var(--lcf-panel-bg)';
+  modal.style.color = 'var(--lcf-text)';
   modal.style.padding = '16px';
   modal.style.borderRadius = '10px';
   modal.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.4)';
@@ -1286,16 +1263,15 @@ function setupFriendRequestForm(wrapper, userRef) {
  * Wires the popup reload action.
  * @param {HTMLElement} popup - Friends popup container.
  * @param {{username: string|null}} userRef - Mutable signed-in user reference.
- * @param {boolean} isDark - Initial theme state.
  */
-function setupReloadButton(popup, userRef, isDark) {
+function setupReloadButton(popup, userRef) {
   const button = popup.querySelector("#reload-button");
   button.style.transition = 'color 0.2s ease, background-color 0.2s ease';
   button.addEventListener("mouseenter", () => {
     button.style.color = "#ffa116";
   });
   button.addEventListener("mouseleave", () => {
-    button.style.color = isDark ? "#e0e0e0" : "#333";
+    button.style.color = 'var(--lcf-text)';
   });
   button.onclick = () => {
     showToastMessage("Reloading data!");
@@ -1349,12 +1325,11 @@ function setupPopupTabs(wrapper) {
   tabBar.insertBefore(highlight, tabBar.firstChild);
 
   function updateActiveTab(activeButton) {
-    const darkModeActive = isDarkMode();
     tabMapping.forEach(({ button, view }, index) => {
       const isActive = button === activeButton;
       button.classList.toggle("active-tab", isActive);
-      button.style.backgroundColor = isActive ? "transparent" : (darkModeActive ? "#1e1e1e" : "#ffffff");
-      button.style.color = isActive ? "#ffa116" : (darkModeActive ? "#e0e0e0" : "#333");
+      button.style.backgroundColor = isActive ? "transparent" : 'var(--lcf-panel-bg)';
+      button.style.color = isActive ? "#ffa116" : 'var(--lcf-text)';
       view.style.display = isActive ? "block" : "none";
       if (isActive) highlight.style.left = `${index * (100 / tabCount)}%`;
     });
@@ -1366,12 +1341,12 @@ function setupPopupTabs(wrapper) {
     button.addEventListener("click", () => updateActiveTab(button));
     button.addEventListener("mouseenter", () => {
       if (!button.classList.contains("active-tab")) {
-        button.style.backgroundColor = isDarkMode() ? "#333" : "#f5f5f5";
+        button.style.backgroundColor = 'var(--lcf-tab-hover-bg)';
       }
     });
     button.addEventListener("mouseleave", () => {
       if (!button.classList.contains("active-tab")) {
-        button.style.backgroundColor = isDarkMode() ? "#1e1e1e" : "#ffffff";
+        button.style.backgroundColor = 'var(--lcf-panel-bg)';
       }
     });
   });
@@ -1388,10 +1363,9 @@ function setupPopupTabs(wrapper) {
  * 
  * @param {HTMLElement} popup - The DOM element into which the popup content will be inserted.
  * @param {string} username - The current user's LeetCode username.
- * @param {boolean} isDark - Whether dark mode is currently active.
  * @returns {Promise<HTMLElement>} - Resolves with the wrapper element containing the rendered content.
  */
-function loadPopupContent(popup, userRef, isDark) {
+function loadPopupContent(popup, userRef) {
   return fetch(chrome.runtime.getURL("popup_content.html"))
     .then(response => response.text())
     .then(html => {
@@ -1400,7 +1374,7 @@ function loadPopupContent(popup, userRef, isDark) {
       ensurePopupNavbar(wrapper);
       setupFriendRequestForm(wrapper, userRef);
       popup.appendChild(wrapper);
-      setupReloadButton(popup, userRef, isDark);
+      setupReloadButton(popup, userRef);
       setupPopupTabs(wrapper);
       return wrapper;
     })
@@ -1443,10 +1417,9 @@ function createFriendsButton() {
 
 /**
  * Creates the floating Friends panel shell.
- * @param {boolean} isDark - Whether dark mode was active during initialization.
  * @returns {HTMLDivElement}
  */
-function createFriendsPopup(isDark) {
+function createFriendsPopup() {
   const popup = document.createElement("div");
   popup.className = "text-text-secondary dark:text-dark-text-secondary rounded shadow-2xl p-2 pt-3 text-sm transition-opacity duration-200";
   popup.style.position = "fixed";
@@ -1456,7 +1429,7 @@ function createFriendsPopup(isDark) {
   popup.style.zIndex = "9999";
   popup.style.width = `${POPUP_WIDTH}px`;
   popup.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.4)";
-  popup.style.backgroundColor = isDark ? "#1e1e1e" : "#ffffff";
+  popup.style.backgroundColor = 'var(--lcf-panel-bg)';
   return popup;
 }
 
@@ -1515,9 +1488,8 @@ function loadPopupData(popup, username, fresh = false) {
  * Replaces the activity view with the first-time registration action.
  * @param {HTMLElement} popup - Friends popup container.
  * @param {{username: string}} userRef - Mutable signed-in user reference.
- * @param {boolean} isDark - Initial theme state.
  */
-function renderRegistrationPrompt(popup, userRef, isDark) {
+function renderRegistrationPrompt(popup, userRef) {
   const popupContent = popup.querySelector("#friend-activity-view");
   popupContent.innerHTML = "";
 
@@ -1543,7 +1515,7 @@ function renderRegistrationPrompt(popup, userRef, isDark) {
       .then(data => {
         if (data.message?.includes("registered")) {
           popup.innerHTML = "";
-          loadPopupContent(popup, { username: userRef.username }, isDark)
+          loadPopupContent(popup, { username: userRef.username })
             .then(() => loadPopupData(popup, userRef.username));
         }
       });
@@ -1556,9 +1528,8 @@ function renderRegistrationPrompt(popup, userRef, isDark) {
  * Loads registration state and initializes the appropriate popup content.
  * @param {HTMLElement} popup - Friends popup container.
  * @param {{username: string}} userRef - Mutable signed-in user reference.
- * @param {boolean} isDark - Initial theme state.
  */
-function loadRegistrationState(popup, userRef, isDark) {
+function loadRegistrationState(popup, userRef) {
   fetch(`${BASE_URL}/user-is-registered?username=${userRef.username}`)
     .then(async (response) => {
       const data = await response.json();
@@ -1569,7 +1540,7 @@ function loadRegistrationState(popup, userRef, isDark) {
       if (data.is_registered) {
         loadPopupData(popup, userRef.username);
       } else {
-        renderRegistrationPrompt(popup, userRef, isDark);
+        renderRegistrationPrompt(popup, userRef);
       }
     })
     .catch(error => showToastMessage(error, "error"));
@@ -1581,14 +1552,13 @@ function loadRegistrationState(popup, userRef, isDark) {
 async function addFriendsButton() {
   // Prevent duplicate button insertions
   if (document.getElementById('friends-button')) return;
-  const isDark = isDarkMode();
   const currentUrl = window.location.href;
   const friendsButton = createFriendsButton();
-  const popup = createFriendsPopup(isDark);
+  const popup = createFriendsPopup();
 
   const userRef = { username: null };
 
-  loadPopupContent(popup, userRef, isDark);
+  loadPopupContent(popup, userRef);
   requestLeetCodeUsername();
 
   window.addEventListener("message", async (event) => {
@@ -1603,7 +1573,7 @@ async function addFriendsButton() {
       console.warn("Navbar container not found!");
       return;
     }
-    loadRegistrationState(popup, userRef, isDark);
+    loadRegistrationState(popup, userRef);
   });
 
   document.body.appendChild(popup);

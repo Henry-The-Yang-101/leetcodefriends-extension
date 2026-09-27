@@ -4,7 +4,7 @@
 // on-page overlays, and talks only to the background service worker via
 // chrome.runtime.sendMessage (outbound) / chrome.runtime.onMessage (inbound).
 // It relies on content.js (loaded before this file, see manifest.json) for
-// shared helpers: isDarkMode() and showToastMessage().
+// shared helpers: showToastMessage().
 //
 // Exposes a small `window.LCFMatch` API that content.js's UI (friend cards,
 // Challenges tab) calls into to create/accept/decline challenges.
@@ -24,10 +24,6 @@ const LCFMatchState = {
   matchEnded: false,
   onIncomingChallenge: null // optional callback content.js can register
 };
-
-function lcfIsDarkModeSafe() {
-  return typeof isDarkMode === "function" ? isDarkMode() : false;
-}
 
 function lcfToast(message, type = "") {
   if (typeof showToastMessage === "function") {
@@ -351,7 +347,6 @@ function lcfRemoveOverlay() {
 }
 
 function lcfBaseOverlayStyles(el) {
-  const dark = lcfIsDarkModeSafe();
   el.style.position = "fixed";
   el.style.inset = "0";
   el.style.zIndex = "2147483647";
@@ -360,9 +355,9 @@ function lcfBaseOverlayStyles(el) {
   el.style.alignItems = "center";
   el.style.justifyContent = "center";
   el.style.fontFamily = '"Roboto Mono", monospace';
-  el.style.backgroundColor = dark ? "rgba(15, 15, 15, 0.88)" : "rgba(255, 255, 255, 0.9)";
+  el.style.backgroundColor = "var(--lcf-overlay-bg)";
   el.style.backdropFilter = "blur(6px)";
-  el.style.color = dark ? "#e0e0e0" : "#1a1a1a";
+  el.style.color = "var(--lcf-overlay-text)";
   el.style.textAlign = "center";
   el.style.gap = "12px";
 }

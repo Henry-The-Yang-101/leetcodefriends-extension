@@ -5,6 +5,36 @@
     box-sizing: border-box;
   ">
   <style>
+    html {
+      --lcf-panel-bg: #ffffff;
+      --lcf-text: #333;
+      --lcf-empty-text: #000;
+      --lcf-card-even: #ffffff;
+      --lcf-card-odd: #f0f0f0;
+      --lcf-row-bg: #f8f8f8;
+      --lcf-current-row-bg: #ffe8cc;
+      --lcf-grid-card-bg: #f9f9f9;
+      --lcf-request-card-bg: #ffffff;
+      --lcf-tab-hover-bg: #f5f5f5;
+      --lcf-overlay-bg: rgba(255, 255, 255, 0.9);
+      --lcf-overlay-text: #1a1a1a;
+    }
+
+    html.dark {
+      --lcf-panel-bg: #1e1e1e;
+      --lcf-text: #e0e0e0;
+      --lcf-empty-text: #e0e0e0;
+      --lcf-card-even: #2a2a2a;
+      --lcf-card-odd: #1f1f1f;
+      --lcf-row-bg: #2b2b2b;
+      --lcf-current-row-bg: #3a2a15;
+      --lcf-grid-card-bg: #1e1e1e;
+      --lcf-request-card-bg: #2a2a2a;
+      --lcf-tab-hover-bg: #333;
+      --lcf-overlay-bg: rgba(15, 15, 15, 0.88);
+      --lcf-overlay-text: #e0e0e0;
+    }
+
     html.dark #leetcode-friends-popup {
       background-color: #1e1e1e !important;
       color: #e0e0e0 !important;
