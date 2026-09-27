@@ -1,113 +1,157 @@
-// Runs in LeetCode's page context so it can use the Monaco instance already
-// powering the code editor. Suggestions are generated locally; no API is used.
+// Attach free language services to LeetCode's existing Monaco editor.
 (() => {
   if (window.__lcfAutocomplete) return;
 
-  const pythonBuiltins = [
-    "abs", "all", "any", "bin", "bool", "chr", "dict", "divmod",
-    "enumerate", "filter", "float", "frozenset", "getattr", "hasattr",
-    "hash", "hex", "int", "isinstance", "iter", "len", "list", "map",
-    "max", "min", "next", "object", "ord", "pow", "print", "range",
-    "reversed", "round", "set", "slice", "sorted", "str", "sum", "tuple",
-    "type", "zip"
-  ];
-  const registeredLanguages = new Set();
   const configuredEditors = new WeakSet();
-
+  const registeredLanguages = new Set();
+  const installedTypeDefaults = new WeakSet();
   const state = window.__lcfAutocomplete = {
     ready: false,
     editorCount: 0,
-    registeredLanguages: []
+    registeredLanguages: [],
+    pythonEngine: "waiting",
+    typescriptEngine: "waiting"
   };
 
-  function provideCompletions(monaco, model, position) {
-    const word = model.getWordUntilPosition(position);
-    const prefix = word.word.toLowerCase();
-    if (!prefix) return { suggestions: [] };
+  // These imports model the modules observed in LeetCode's Python3 runner.
+  // They exist only in Pyright's virtual document; the user's code is untouched.
+  const pythonPrelude = [
+    "from bisect import *", "from collections import *", "from copy import *",
+    "from datetime import *", "from functools import *", "from heapq import *",
+    "from io import *", "from itertools import *", "from math import *",
+    "from operator import *", "from random import *", "from re import *",
+    "from statistics import *", "from string import *", "from sys import *",
+    "from sortedcontainers import *", "import sortedcontainers",
+    "from typing import *", "import bisect, collections, copy, datetime, functools, heapq",
+    "import io, itertools, json, math, operator, os, random, re",
+    "import statistics, string, sys, time"
+  ].join("\n") + "\n";
+  const preludeLines = pythonPrelude.split("\n").length - 1;
+  let pyrightStarted = false;
 
-    const range = {
-      startLineNumber: position.lineNumber,
-      startColumn: word.startColumn,
-      endLineNumber: position.lineNumber,
-      endColumn: word.endColumn
-    };
-    const language = model.getLanguageId();
-    const suggestions = [];
-    const seen = new Set();
-
-    // Monaco's own matching, ranking, and suggestion widget handle display.
-    // These local candidates fill the gap when LeetCode disables completion.
-    if (language === "python" || language === "python3") {
-      for (const name of pythonBuiltins) {
-        if (!name.startsWith(prefix)) continue;
-        suggestions.push({
-          label: name,
-          kind: monaco.languages.CompletionItemKind.Function,
-          insertText: name,
-          range,
-          detail: "Python built-in"
-        });
-        seen.add(name);
+  function installLodashTypes(monaco) {
+    const defaults = monaco.languages?.typescript;
+    if (!defaults || !Array.isArray(window.__lcfLodashTypes)) return;
+    for (const typeDefaults of [defaults.javascriptDefaults, defaults.typescriptDefaults]) {
+      if (!typeDefaults?.addExtraLib || installedTypeDefaults.has(typeDefaults)) continue;
+      for (const file of window.__lcfLodashTypes) {
+        typeDefaults.addExtraLib(file.source, file.path);
       }
+      installedTypeDefaults.add(typeDefaults);
     }
-
-    const source = model.getValue();
-    for (const match of source.matchAll(/\b[A-Za-z_][A-Za-z_0-9]*\b/g)) {
-      const name = match[0];
-      if (seen.has(name) || name.toLowerCase() === prefix ||
-          !name.toLowerCase().startsWith(prefix)) continue;
-      seen.add(name);
-      suggestions.push({
-        label: name,
-        kind: monaco.languages.CompletionItemKind.Variable,
-        insertText: name,
-        range,
-        detail: "In this solution"
-      });
-      if (suggestions.length >= 80) break;
-    }
-
-    return { suggestions };
+    state.typescriptEngine = "Monaco TypeScript service with lodash types";
   }
 
-  function registerLanguage(monaco, language) {
-    if (registeredLanguages.has(language)) return;
-    monaco.languages.registerCompletionItemProvider(language, {
-      provideCompletionItems(model, position) {
-        return provideCompletions(monaco, model, position);
-      }
-    });
-    registeredLanguages.add(language);
+  function shiftRange(range) {
+    if (!range) return range;
+    if (range.insert && range.replace) {
+      return { insert: shiftRange(range.insert), replace: shiftRange(range.replace) };
+    }
+    return {
+      ...range,
+      startLineNumber: range.startLineNumber - preludeLines,
+      endLineNumber: range.endLineNumber - preludeLines
+    };
+  }
+
+  function registerPython(monaco, provider) {
+    for (const language of ["python3"]) {
+      if (registeredLanguages.has(language)) continue;
+      monaco.languages.registerCompletionItemProvider(language, {
+        triggerCharacters: ["."],
+        async provideCompletionItems(model, position) {
+          // Pyright supplies parsing, scope analysis, builtins and member lookup.
+          const result = await provider.lspClient.getCompletion(
+            pythonPrelude + model.getValue(),
+            { line: position.lineNumber + preludeLines - 1, character: position.column - 1 }
+          );
+          const items = Array.isArray(result) ? result : result?.items || [];
+          const word = model.getWordUntilPosition(position);
+          const suggestions = items.map(item => {
+            const completion = provider.convertCompletionItem(item);
+            // LSP and Monaco assign different numbers to the same kind names.
+            const kindName = window.__lcfLspCompletionItemKindNames?.[item.kind];
+            completion.kind = monaco.languages.CompletionItemKind[kindName] ??
+              monaco.languages.CompletionItemKind.Text;
+            completion.range = shiftRange(completion.range) || {
+              startLineNumber: position.lineNumber,
+              endLineNumber: position.lineNumber,
+              startColumn: word.startColumn,
+              endColumn: position.column
+            };
+            if (completion.additionalTextEdits) {
+              completion.additionalTextEdits = completion.additionalTextEdits
+                .map(edit => ({ ...edit, range: shiftRange(edit.range) }))
+                .filter(edit => edit.range.startLineNumber > 0);
+            }
+            return completion;
+          }).filter(item => {
+            const range = item.range?.replace || item.range;
+            return range?.startLineNumber > 0;
+          });
+          return { suggestions, incomplete: !Array.isArray(result) && !!result?.isIncomplete };
+        }
+      });
+      registeredLanguages.add(language);
+    }
     state.registeredLanguages = [...registeredLanguages];
+  }
+
+  async function startPyright(monaco) {
+    if (pyrightStarted || !window.__lcfPyrightProviderClass) return;
+    const workerUrl = document.documentElement.dataset.lcfPyrightWorker;
+    if (!workerUrl) return;
+    pyrightStarted = true;
+    state.pythonEngine = "loading Pyright";
+    try {
+      // Start on LeetCode's origin, then load the packaged worker on device.
+      const bootstrap = URL.createObjectURL(new Blob(
+        ["importScripts(" + JSON.stringify(workerUrl) + ");"],
+        { type: "application/javascript" }
+      ));
+      const provider = new window.__lcfPyrightProviderClass(bootstrap, {
+        typeStubs: window.__lcfPythonStubs,
+        features: {
+          hover: false, completion: false, signatureHelp: false,
+          diagnostic: false, rename: false, findDefinition: false
+        }
+      });
+      await Promise.race([
+        provider.init(monaco),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Pyright startup timed out")), 20000))
+      ]);
+      registerPython(monaco, provider);
+      state.pythonEngine = "Pyright ready";
+    } catch (error) {
+      state.pythonEngine = "unavailable: " + (error.message || String(error));
+      console.warn("LeetCode Friends: Pyright could not start", error);
+    }
   }
 
   function connect() {
     const monaco = window.monaco;
-    if (!monaco?.editor?.getEditors ||
-        !monaco?.languages?.registerCompletionItemProvider) return;
-
-    for (const editor of monaco.editor.getEditors()) {
-      const model = editor.getModel();
-      if (!model || model.getLanguageId() === "plaintext") continue;
-      registerLanguage(monaco, model.getLanguageId());
-      if (!configuredEditors.has(editor)) {
-        editor.updateOptions({
-          quickSuggestions: { other: true, comments: false, strings: false },
-          suggestOnTriggerCharacters: true,
-          wordBasedSuggestions: "currentDocument"
-        });
-        configuredEditors.add(editor);
-      }
+    if (!monaco?.editor?.getEditors) return;
+    installLodashTypes(monaco);
+    const editors = monaco.editor.getEditors().filter(editor => {
+      const language = editor.getModel()?.getLanguageId();
+      return language && language !== "plaintext";
+    });
+    for (const editor of editors) {
+      if (configuredEditors.has(editor)) continue;
+      editor.updateOptions({
+        quickSuggestions: { other: true, comments: false, strings: false },
+        suggestOnTriggerCharacters: true,
+        wordBasedSuggestions: "currentDocument"
+      });
+      configuredEditors.add(editor);
     }
-
-    state.editorCount = monaco.editor.getEditors().filter(editor => {
-      const model = editor.getModel();
-      return model && model.getLanguageId() !== "plaintext";
-    }).length;
-    state.ready = state.editorCount > 0;
+    state.editorCount = editors.length;
+    state.ready = editors.length > 0;
+    if (editors.some(editor => editor.getModel().getLanguageId() === "python3")) {
+      void startPyright(monaco);
+    }
   }
 
   connect();
-  // LeetCode mounts/replaces editors during navigation and language changes.
   window.setInterval(connect, 1000);
 })();

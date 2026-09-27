@@ -24,14 +24,19 @@
     },
     {
       "matches": ["https://leetcode.com/problems/*"],
-      "js": ["autocomplete.js"],
+      "js": ["vendor/pyright-client.js", "vendor/lodash-types.js", "vendor/python-stubs.js", "autocomplete.js"],
       "run_at": "document_idle",
       "world": "MAIN"
+    },
+    {
+      "matches": ["https://leetcode.com/problems/*"],
+      "js": ["autocomplete-config.js"],
+      "run_at": "document_start"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["username_obtainer.js", "popup_content.html", "submission_interceptor.js"],
+      "resources": ["username_obtainer.js", "popup_content.html", "submission_interceptor.js", "vendor/pyright-worker.js"],
       "matches": ["https://leetcode.com/*"]
     }
   ]

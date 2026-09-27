@@ -1,2 +1,3 @@
 *.zip
 versions/
+node_modules/
