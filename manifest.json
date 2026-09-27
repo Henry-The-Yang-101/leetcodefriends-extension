@@ -21,6 +21,12 @@
         "content.js",
         "match.js"
       ]
+    },
+    {
+      "matches": ["https://leetcode.com/problems/*"],
+      "js": ["autocomplete.js"],
+      "run_at": "document_idle",
+      "world": "MAIN"
     }
   ],
   "web_accessible_resources": [
